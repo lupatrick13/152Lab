@@ -787,4 +787,81 @@ Object Converter::visitReadArguments(PascalParser::ReadArgumentsContext *ctx)
     return nullptr;
 }
 
+Object Converter::visitWhileStatement(PascalParser::WhileStatementContext *ctx){
+
+    code.emit("while (");
+    code.emit(visit(ctx->expression()).as<string>());
+    code.emit(")");
+    code.indent();
+
+    visit(ctx->statement());
+
+    code.dedent();
+
+    return nullptr;
+}
+
+Object Converter::visitIfStatement(PascalParser::IfStatementContext *ctx){
+	bool checkelse = ctx->ELSE() != nullptr;
+	code.emit("if (");
+	code.emit(visit(ctx->expression()).as<string>());
+	code.emit(") ");
+	code.indent();
+	//code.emitLine();
+	visit(ctx->trueStatement()->statement());
+	code.dedent();
+	if(checkelse){
+		code.emitStart();
+		code.emit("else ");
+		code.indent();
+		visit(ctx->falseStatement()->statement());
+		code.emitEnd("");
+		code.dedent();
+	}
+	return nullptr;
+}
+Object Converter::visitForStatement(PascalParser::ForStatementContext *ctx) {
+	string relop = ctx->DOWNTO() != nullptr ? ">=" : "<=";
+	string dent = ctx->DOWNTO() != nullptr ? "--" : "++";
+	string variable = visit(ctx->variable()).as<string>();
+	string start = visit(ctx->expression(0)).as<string>();
+	string end = visit(ctx->expression(1)).as<string>();
+
+	code.emit("for( " + variable + " = " + start + "; " //initalize variable
+			+ variable + " " + relop + " " + end + "; " //condition
+			+ variable + dent + ") "); //increment/decrement
+	code.indent();
+	visit(ctx->statement());
+	code.dedent();
+
+	return nullptr;
+}
+
+Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx) {
+	PascalParser::CaseBranchListContext *BranchList = ctx->caseBranchList();
+
+	code.emitLine("switch (" + visit(ctx->expression()).as<string>() + ") {");
+	code.indent();
+	for(PascalParser::CaseBranchContext *Branch : BranchList->caseBranch()){
+		if(Branch->caseConstantList() != nullptr){
+			for(PascalParser::CaseConstantContext *Constant : Branch->caseConstantList()->caseConstant()){
+				code.emitLine("case " + visit(Constant->constant()).as<string>() + " :");
+			}
+			code.indent();
+			code.emitStart();
+			visit(Branch->statement());
+			code.emitStart("break;");
+			code.emitEnd("");
+			code.dedent();
+		}
+	}
+	code.emitLine("}");
+	return nullptr;
+}
+
+Object Converter::visitConstant(PascalParser::ConstantContext *ctx){
+	string text = "";
+	text += ctx->getText();
+	return text;
+}
 }} // namespace backend::converter
