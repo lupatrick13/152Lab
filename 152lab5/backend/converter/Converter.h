@@ -75,6 +75,8 @@ public:
     Object visitReadStatement(PascalParser::ReadStatementContext *ctx) override;
     Object visitReadlnStatement(PascalParser::ReadlnStatementContext *ctx) override;
     Object visitReadArguments(PascalParser::ReadArgumentsContext *ctx) override;
+    Object visitWhileStatement(PascalParser::WhileStatementContext *ctx) override;
+    Object visitIfStatement(PascalParser::IfStatementContext *ctx) override;
 
 private:
     // Map a Pascal datatype name to the C++ datatype name.
