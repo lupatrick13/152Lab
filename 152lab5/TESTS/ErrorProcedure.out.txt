@@ -1,0 +1,171 @@
+SOURCE FILE "ErrorProcedure.pas":
+
+001 PROGRAM ErrorProcedure(input, output);
+002 
+003 VAR
+004     i, j : integer;
+005     x, y : real;
+006     p : boolean;
+007     
+008 PROCEDURE alpha(m, n : integer; 
+009                 r : real; 
+010                 VAR k, o : integer; 
+011                 VAR w, z : real; 
+012                 VAR q : boolean);        
+013     BEGIN
+014     END;
+015     
+016 procedure beta;
+017     begin
+018     end;
+019     
+020 PROCEDURE gamma(i, n : integer; 
+021                 r : real;
+022                 VAR w, r : real);
+023     BEGIN
+024     END;    
+025     
+026 BEGIN
+027     i := 5; j := 7;
+028     x := 3; y := 2;
+029     p := false;
+030         
+031     alpha(6, i - 3.0, 
+032           x + y/i, 
+033           i, j + 2, 
+034           8*i, i, 
+035           not p);
+036           
+037     beta(i);
+038     
+039     x(i, j, k, p);
+040     
+041     gamma(12, i*x, 
+042           i div j,
+043           i, x + y);
+044           
+045     delta(x, y, z);
+046 END.
+
+PASS 1 Syntax: There were no syntax errors.
+
+PASS 2 Semantics:
+
+===== SEMANTIC ERRORS =====
+
+Line Message                             Found near
+---- -------                             ----------
+022  Redeclared identifier               "r"
+031  Mismatched datatype                 "i-3.0"
+033  Argument must be a variable         "j+2"
+034  Argument must be a variable         "8*i"
+034  Mismatched datatype                 "i"
+035  Argument must be a variable         "notp"
+037  Invalid number of arguments         "beta(i)"
+039  Must be a procedure name            "x"
+039  Undeclared identifier               "k"
+041  Mismatched datatype                 "i*x"
+043  Mismatched datatype                 "i"
+045  Undeclared identifier               "delta"
+045  Undeclared identifier               "z"
+
+===== CROSS-REFERENCE TABLE =====
+
+*** PROGRAM ErrorProcedure ***
+
+Identifier       Line numbers    Type specification
+----------       ------------    ------------------
+alpha           
+                                 Defined as: PROCEDURE
+                                 Scope nesting level: 1
+beta            
+                                 Defined as: PROCEDURE
+                                 Scope nesting level: 1
+gamma           
+                                 Defined as: PROCEDURE
+                                 Scope nesting level: 1
+i                004 027 031 032 033 034 034 039 041 042 043
+                                 Defined as: variable
+                                 Scope nesting level: 1
+                                 Type form = scalar, Type id = integer
+j                004 027 033 039 042
+                                 Defined as: variable
+                                 Scope nesting level: 1
+                                 Type form = scalar, Type id = integer
+p                006 029 039
+                                 Defined as: variable
+                                 Scope nesting level: 1
+                                 Type form = enumeration, Type id = boolean
+x                005 028 032 041 043 045
+                                 Defined as: variable
+                                 Scope nesting level: 1
+                                 Type form = scalar, Type id = real
+y                005 028 032 043 045
+                                 Defined as: variable
+                                 Scope nesting level: 1
+                                 Type form = scalar, Type id = real
+
+*** PROCEDURE alpha ***
+
+Identifier       Line numbers    Type specification
+----------       ------------    ------------------
+k                010
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+m                008
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+n                008
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+o                010
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+q                012
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = enumeration, Type id = boolean
+r                009
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = real
+w                011
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = real
+z                011
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = real
+
+*** PROCEDURE beta ***
+
+Identifier       Line numbers    Type specification
+----------       ------------    ------------------
+
+*** PROCEDURE gamma ***
+
+Identifier       Line numbers    Type specification
+----------       ------------    ------------------
+i                020
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+n                020
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = integer
+r                021 022
+                                 Defined as: value parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = real
+w                022
+                                 Defined as: VAR parameter
+                                 Scope nesting level: 2
+                                 Type form = scalar, Type id = real
+
+There were 13 semantic errors. Object file not created or modified.

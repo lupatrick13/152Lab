@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cdtprojectproperties>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.IncludePaths">
+<language name="C Source File">
+
+</language>
+<language name="C++ Source File">
+<includepath workspace_path="true">/${ProjName}</includepath>
+<includepath workspace_path="true">/${ProjName}/TESTS</includepath>
+<includepath workspace_path="true">/${ProjName}/backend/converter</includepath>
+<includepath workspace_path="true">/${ProjName}/backend/interpreter</includepath>
+<includepath workspace_path="true">/${ProjName}/frontend</includepath>
+<includepath workspace_path="true">/${ProjName}/intermediate/symtab</includepath>
+<includepath workspace_path="true">/${ProjName}/intermediate/type</includepath>
+<includepath workspace_path="true">/${ProjName}/intermediate/util</includepath>
+<includepath workspace_path="true">/${ProjName}/target/generated-sources/antlr4</includepath>
+<includepath>/Users/patrick/ANTLR-4.8/antlr4-runtime</includepath>
+<includepath>/Users/patrick/ANTLR-4.8/lib</includepath>
+
+</language>
+<language name="Object File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+</section>
+<section name="org.eclipse.cdt.internal.ui.wizards.settingswizards.Macros">
+<language name="C Source File">
+
+</language>
+<language name="C++ Source File">
+
+</language>
+<language name="Object File">
+
+</language>
+<language name="Assembly Source File">
+
+</language>
+</section>
+</cdtprojectproperties>
