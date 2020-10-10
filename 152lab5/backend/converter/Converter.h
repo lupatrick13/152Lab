@@ -80,6 +80,9 @@ public:
     Object visitForStatement(PascalParser::ForStatementContext *ctx) override;
     Object visitCaseStatement(PascalParser::CaseStatementContext *ctx) override;
     Object visitConstant(PascalParser::ConstantContext *ctx) override;
+    Object visitProcedureCallStatement(PascalParser::ProcedureCallStatementContext *ctx) override;
+    Object visitFunctionCallFactor(PascalParser::FunctionCallFactorContext *ctx) override;
+    Object visitFunctionCall(PascalParser::FunctionCallContext *ctx) override;
 
 private:
     // Map a Pascal datatype name to the C++ datatype name.

@@ -845,7 +845,13 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx) {
 	for(PascalParser::CaseBranchContext *Branch : BranchList->caseBranch()){
 		if(Branch->caseConstantList() != nullptr){
 			for(PascalParser::CaseConstantContext *Constant : Branch->caseConstantList()->caseConstant()){
-				code.emitLine("case " + visit(Constant->constant()).as<string>() + " :");
+				string ID = "";
+				SymtabEntry *EnumCon;
+				if(Constant->type->getEnumerationConstants()){
+					EnumCon = Constant->type->getIdentifier();
+					ID += EnumCon->getName() + "::";
+				}
+				code.emitLine("case " + ID+  visit(Constant->constant()).as<string>() + " :");
 			}
 			code.indent();
 			code.emitStart();
@@ -860,8 +866,42 @@ Object Converter::visitCaseStatement(PascalParser::CaseStatementContext *ctx) {
 }
 
 Object Converter::visitConstant(PascalParser::ConstantContext *ctx){
+	string text = ctx->getText();
+	transform(text.begin(), text.end(), text.begin(), ::tolower);
+	return text;
+
+}
+Object Converter::visitProcedureCallStatement(PascalParser::ProcedureCallStatementContext *ctx){
+	string identifier = ctx->procedureName()->entry->getName();
+	code.emitStart(identifier + "(");
+	if(ctx->argumentList()!= nullptr){
+		int size = ctx->argumentList()->argument().size()-1;
+		for(int i = 0; i<size; i++ ){
+			PascalParser::ArgumentContext *Arg = ctx->argumentList()->argument(i);
+			code.emit(visit(Arg->expression()).as<string>() + ", ");
+		}
+		code.emit(visit(ctx->argumentList()->argument(size)->expression()).as<string>());
+	}
+	code.emitEnd(");");
+	return nullptr;
+}
+Object Converter::visitFunctionCall(PascalParser::FunctionCallContext *ctx){
+	string identifier = ctx->functionName()->getText();
 	string text = "";
-	text += ctx->getText();
+	text+=(identifier + "(");
+	if(ctx->argumentList()!= nullptr){
+		int size = ctx->argumentList()->argument().size()-1;
+		for(int i = 0; i<size; i++ ){
+			PascalParser::ArgumentContext *Arg = ctx->argumentList()->argument(i);
+			text+=(visit(Arg->expression()).as<string>() + ", ");
+		}
+		text+=(visit(ctx->argumentList()->argument(size)->expression()).as<string>());
+	}
+	text+=(")");
 	return text;
 }
+Object Converter::visitFunctionCallFactor(PascalParser::FunctionCallFactorContext *ctx){
+	return visit(ctx->children[0]);
+}
+
 }} // namespace backend::converter
