@@ -60,7 +60,29 @@ void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext
 
 void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 {
-    /***** Complete this member function. *****/
+	/***** Complete this member function. *****/
+    Label *exitLabel;
+    Label *elseLabel = new Label();
+
+    compiler->visit(ctx->expression());
+
+    emit(IFEQ, elseLabel);
+    compiler->visit(ctx->trueStatement());
+
+    if(ctx->falseStatement() != nullptr)
+    {
+    	exitLabel = new Label();
+    	emit(GOTO,exitLabel);
+    }
+
+    emitLabel(elseLabel);
+
+    if(ctx->falseStatement() != nullptr)
+    {
+    	compiler->visit(ctx->falseStatement());
+    	emitLabel(exitLabel);
+    }
+
 }
 
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
@@ -86,11 +108,59 @@ void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
 void StatementGenerator::emitWhile(PascalParser::WhileStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+	Label *loop = new Label();
+	Label *exit = new Label();
+
+	emitLabel(loop);
+
+	compiler->visit(ctx->expression());
+	emit(IFEQ, exit);
+
+	compiler->visit(ctx->statement());
+	emit(GOTO,loop);
+
+	emitLabel(exit);
+
 }
 
 void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+	SymtabEntry *variableId = ctx->variable()->variableIdentifier()->entry;
+	Typespec *varType  = ctx->variable()->variableIdentifier()->type;
+	PascalParser::ExpressionContext *expr0Ctx = ctx->expression(0);
+	Instruction crement = ctx->TO() != nullptr ? IF_ICMPGT : IF_ICMPLT;
+
+	Label *exit = new Label();
+	Label *loop = new Label();
+	Label *cmp1 = new Label();
+	Label *cmp2 = new Label();
+
+	compiler->visit(expr0Ctx);
+	emitStoreValue(variableId, varType);
+	emitLabel(loop);
+
+	emitLoadValue(variableId);
+
+	compiler->visit(ctx->expression(1));
+	emit(crement, cmp1);
+	emitLoadConstant(0);
+	emit(GOTO, cmp2);
+	emitLabel(cmp1);
+	emitLoadConstant(1);
+	emitLabel(cmp2);
+	//check if you go into loop again
+	emit(IFNE, exit);
+	compiler->visit(ctx->statement());
+	// Increment/decrement
+	emitLoadValue(variableId);
+	emitLoadConstant(1);
+	if(crement == IF_ICMPGT) 	emit(IADD);
+	else 						emit(ISUB);
+	emitStoreValue(variableId, varType);
+	//final part, go to loop to check condition and exit if condition false
+	emit(GOTO, loop);
+	emitLabel(exit);
 }
 
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
