@@ -148,7 +148,37 @@ void ProgramGenerator::emitSubroutines(PascalParser::RoutinesPartContext *ctx)
 
 void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
 {
-    emitLine();
+    PascalParser::RoutinesPartContext *RPC = ctx->block()->declarations()->routinesPart();
+    int stackSize = 0;
+    if(RPC != nullptr)
+    {
+		for(PascalParser::RoutineDefinitionContext *Def : RPC->routineDefinition())
+		{
+			int size = 0;
+			if(Def->procedureHead() != nullptr)
+			{
+				vector<SymtabEntry *> *parmIds = Def->procedureHead()->routineIdentifier()->entry->getRoutineParameters();
+				if(parmIds != nullptr)
+					{
+						for(SymtabEntry * parmId : *parmIds)
+							size++;
+					}
+				stackSize = max(stackSize, size);
+			}
+			else
+			{
+				vector<SymtabEntry *> *parmIds = Def->functionHead()->routineIdentifier()->entry->getRoutineParameters();
+				if(parmIds != nullptr)
+					{
+						for(SymtabEntry * parmId : *parmIds)
+							size++;
+					}
+				stackSize = max(stackSize, size);
+			}
+		}
+    }
+
+	emitLine();
     emitComment("MAIN");
     emitDirective(METHOD_PUBLIC_STATIC,
                               "main([Ljava/lang/String;)V");
@@ -162,8 +192,7 @@ void ProgramGenerator::emitMainMethod(PascalParser::ProgramContext *ctx)
     // Emit code for the compound statement.
     emitLine();
     compiler->visit(ctx->block()->compoundStatement());
-
-    emitMainEpilogue();
+    emitMainEpilogue(stackSize);
 }
 
 void ProgramGenerator::emitMainPrologue(SymtabEntry *programId)
@@ -180,7 +209,7 @@ void ProgramGenerator::emitMainPrologue(SymtabEntry *programId)
     emit(ASTORE_1);
 }
 
-void ProgramGenerator::emitMainEpilogue()
+void ProgramGenerator::emitMainEpilogue(int stackSize)
 {
     // Print the execution time.
     emitLine();
@@ -216,7 +245,7 @@ void ProgramGenerator::emitMainEpilogue()
     emitLine();
 
     emitDirective(LIMIT_LOCALS, localVariables->count());
-    emitDirective(LIMIT_STACK,  localStack->capacity());
+    emitDirective(LIMIT_STACK,  max(stackSize,localStack->capacity()));
     emitDirective(END_METHOD);
 
     close();  // the object file

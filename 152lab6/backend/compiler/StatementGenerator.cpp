@@ -88,6 +88,45 @@ void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+	vector<Label*> stuffs;
+	Label *exit;
+	int index = 0;
+	compiler->visit(ctx->expression());
+	emit(LOOKUPSWITCH);
+	for (PascalParser::CaseBranchContext *Branch : ctx->caseBranchList()->caseBranch())
+	{
+		if(Branch->children.size() > 0)
+		{
+			stuffs.push_back(new Label());
+			for(PascalParser::CaseConstantContext *constant: Branch->caseConstantList()->caseConstant())
+			{
+				Typespec *type = constant->type;
+				string temp = constant->getText();
+				if(type == Predefined::charType)
+					emitLabel(temp[1], stuffs[index]);
+				else if(type == Predefined::realType)
+					emitLabel(stof(temp), stuffs[index]);
+				else if(type == Predefined::integerType)
+					emitLabel(stoi(temp), stuffs[index]);
+			}
+			index++;
+		}
+	}
+	exit = new Label();
+	emitLabel("default", exit);
+	index = 0;
+	for(PascalParser::CaseBranchContext *Branch: ctx->caseBranchList()->caseBranch())
+	{
+
+		if(Branch->children.size() > 0)
+		{
+			emitLabel(stuffs[index]);
+			compiler->visit(Branch->statement());
+			emit(GOTO, exit);
+			index++;
+		}
+	}
+	emitLabel(exit);
 }
 
 void StatementGenerator::emitRepeat(PascalParser::RepeatStatementContext *ctx)
@@ -166,17 +205,57 @@ void StatementGenerator::emitFor(PascalParser::ForStatementContext *ctx)
 void StatementGenerator::emitProcedureCall(PascalParser::ProcedureCallStatementContext *ctx)
 {
     /***** Complete this member function. *****/
+	SymtabEntry *routineId = ctx->procedureName()->entry;
+	PascalParser::ArgumentListContext *argListCtx = ctx->argumentList();
+	emitCall(routineId, argListCtx);
+
 }
 
 void StatementGenerator::emitFunctionCall(PascalParser::FunctionCallContext *ctx)
 {
     /***** Complete this member function. *****/
+	SymtabEntry *routineId = ctx->functionName()->entry;
+	PascalParser::ArgumentListContext *argListCtx = ctx->argumentList();
+	emitCall(routineId, argListCtx);
 }
 
 void StatementGenerator::emitCall(SymtabEntry *routineId,
                                   PascalParser::ArgumentListContext *argListCtx)
 {
     /***** Complete this member function. *****/
+	string ProcName = routineId->getName();
+	string Param = "";
+	int index = 0;
+	vector<SymtabEntry *> *parmIds = routineId->getRoutineParameters();
+	if(parmIds != nullptr)
+	{
+		for(SymtabEntry * parmId : *parmIds)
+			Param += typeDescriptor(parmId); //gets all parameters
+	}
+	if(argListCtx != nullptr){
+		for(PascalParser::ArgumentContext *args : argListCtx->argument())
+		{
+			const char checkType = Param.at(index);
+			Typespec *type = args->expression()->type;
+
+			compiler->visit(args->expression());
+			localStack->increase(0);
+
+			if(typeDescriptor(type).at(0) != checkType) //to get correct type conversion for parameters
+			{
+				string temp = typeDescriptor(type) + "2" + Param[index];
+				if(temp == "I2F") emit(I2F);
+				else if(temp == "I2C") emit(I2C);
+				else if(temp == "I2D") emit(I2D);
+				else if(temp == "F2I") emit(F2I);
+				else if(temp == "F2D") emit(F2D);
+				else if(temp == "D2F") emit(D2F);
+			}
+			index++;
+		}
+	}
+
+	emit(INVOKESTATIC, programName + "/" + ProcName + "(" + Param + ")" + typeDescriptor(routineId));
 }
 
 void StatementGenerator::emitWrite(PascalParser::WriteStatementContext *ctx)

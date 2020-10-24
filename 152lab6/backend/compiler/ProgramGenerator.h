@@ -83,7 +83,7 @@ private:
     /*
      * Emit the main method epilogue.
      */
-    void emitMainEpilogue();
+    void emitMainEpilogue(int stackSize);
 
     /*
      * Emit the routine header.
