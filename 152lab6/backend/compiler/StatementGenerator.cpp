@@ -14,6 +14,20 @@ namespace backend { namespace compiler {
 using namespace std;
 using namespace intermediate;
 
+struct CustomSort final
+{
+	bool operator() (const pair< pair<string,Typespec*>, int> &LHS, const pair< pair<string,Typespec*>, int> &RHS) const
+	{
+		if(LHS.first.second == Predefined::charType)
+			return LHS.first.first[1] < RHS.first.first[1];
+		else if(LHS.first.second == Predefined::realType)
+			return stof(LHS.first.first) < stof(RHS.first.first);
+		else if(LHS.first.second == Predefined::integerType)
+			return stoi(LHS.first.first) < stoi(RHS.first.first);
+		return false;
+	}
+};
+
 void StatementGenerator::emitAssignment(PascalParser::AssignmentStatementContext *ctx)
 {
     PascalParser::VariableContext *varCtx  = ctx->lhs()->variable();
@@ -88,8 +102,9 @@ void StatementGenerator::emitIf(PascalParser::IfStatementContext *ctx)
 void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 {
     /***** Complete this member function. *****/
-	vector<Label*> stuffs;
+	vector<Label*> Labels;
 	Label *exit;
+	set<pair< pair<string,Typespec*>, int>, CustomSort> ConstantList;
 	int index = 0;
 	compiler->visit(ctx->expression());
 	emit(LOOKUPSWITCH);
@@ -97,20 +112,27 @@ void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 	{
 		if(Branch->children.size() > 0)
 		{
-			stuffs.push_back(new Label());
+
+			Labels.push_back(new Label());
 			for(PascalParser::CaseConstantContext *constant: Branch->caseConstantList()->caseConstant())
 			{
 				Typespec *type = constant->type;
-				string temp = constant->getText();
-				if(type == Predefined::charType)
-					emitLabel(temp[1], stuffs[index]);
-				else if(type == Predefined::realType)
-					emitLabel(stof(temp), stuffs[index]);
-				else if(type == Predefined::integerType)
-					emitLabel(stoi(temp), stuffs[index]);
+				string Constant = constant->getText();
+				pair<string,Typespec* > ConstantPair = {Constant,type};
+				pair< pair<string,Typespec*>, int> ConstantandLabel = {ConstantPair, index};
+				ConstantList.insert(ConstantandLabel);
 			}
 			index++;
 		}
+	}
+	for(pair<pair<string,Typespec*>, int> Constants : ConstantList)
+	{
+		if(Constants.first.second == Predefined::charType)
+			emitLabel(Constants.first.first[1], Labels[Constants.second]);
+		else if(Constants.first.second == Predefined::realType)
+			emitLabel(stof(Constants.first.first), Labels[Constants.second]);
+		else if(Constants.first.second == Predefined::integerType)
+			emitLabel(stoi(Constants.first.first), Labels[Constants.second]);
 	}
 	exit = new Label();
 	emitLabel("default", exit);
@@ -120,7 +142,7 @@ void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 
 		if(Branch->children.size() > 0)
 		{
-			emitLabel(stuffs[index]);
+			emitLabel(Labels[index]);
 			compiler->visit(Branch->statement());
 			emit(GOTO, exit);
 			index++;
@@ -473,5 +495,7 @@ void StatementGenerator::emitRead(PascalParser::ReadArgumentsContext *argsCtx,
         emit(POP);
     }
 }
+
+
 
 }} // namespace backend::compiler
