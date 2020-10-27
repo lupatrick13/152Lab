@@ -24,7 +24,32 @@ struct CustomSort final
 			return stof(LHS.first.first) < stof(RHS.first.first);
 		else if(LHS.first.second == Predefined::integerType)
 			return stoi(LHS.first.first) < stoi(RHS.first.first);
-		return false;
+		else if(LHS.first.second->getForm() == Form::ENUMERATION)
+		{
+			vector<SymtabEntry *> *EnumConst1 = LHS.first.second->getEnumerationConstants();
+			vector<SymtabEntry *> *EnumConst2 = RHS.first.second->getEnumerationConstants();
+			int index1 = 0;
+			int index2 = 0;
+			string name1 = LHS.first.first;
+			string name2 = RHS.first.first;
+			transform(name1.begin(), name1.end(), name1.begin(), ::tolower);
+			transform(name2.begin(), name2.end(), name2.begin(), ::tolower);
+			for(SymtabEntry* Const1 : *EnumConst1)
+			{
+				if(Const1->getName() == name1)
+					break;
+				index1++;
+			}
+			for(SymtabEntry* Const2 : *EnumConst2)
+			{
+				if(Const2->getName() == name2)
+					break;
+				index2++;
+			}
+			return index1 < index2;
+
+		}
+		return true;
 	}
 };
 
@@ -133,6 +158,22 @@ void StatementGenerator::emitCase(PascalParser::CaseStatementContext *ctx)
 			emitLabel(stof(Constants.first.first), Labels[Constants.second]);
 		else if(Constants.first.second == Predefined::integerType)
 			emitLabel(stoi(Constants.first.first), Labels[Constants.second]);
+		else if(Constants.first.second->getForm() == Form::ENUMERATION)
+		{
+			vector<SymtabEntry *> *EnumConst = Constants.first.second->getEnumerationConstants();
+			int index = 0;
+			string name = Constants.first.first;
+			transform(name.begin(), name.end(), name.begin(), ::tolower);
+			for(SymtabEntry* Const : *EnumConst)
+			{
+				if(Const->getName() == name)
+					break;
+				index++;
+			}
+			emitLabel(index, Labels[Constants.second]);
+		}
+		else
+			emitLabel(Constants.first.first, Labels[Constants.second]);
 	}
 	exit = new Label();
 	emitLabel("default", exit);
