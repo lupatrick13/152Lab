@@ -1,0 +1,16 @@
+GOOEY test; 
+
+var: 	int nums;
+	  panel pan;
+	  label lab;
+	 .
+func :
+		int number2(){
+		number2 = 2;
+		}
+.
+
+main : 
+{
+	pan.add(lab, 'hello'+ nums);
+} fin
