@@ -35,6 +35,7 @@ public:
     static Typespec *buttonType;
     static Typespec *labelType;
     static Typespec *panelType;
+    static Typespec *textType;
     static Typespec *undefinedType;
 
     // Predefined identifiers.
@@ -46,6 +47,7 @@ public:
     static SymtabEntry *buttonId;
     static SymtabEntry *labelId;
     static SymtabEntry *panelId;
+    static SymtabEntry *textId;
     static SymtabEntry *falseId;
     static SymtabEntry *trueId;
     static SymtabEntry *roundId;
@@ -53,6 +55,7 @@ public:
     static SymtabEntry *truncId;
     static SymtabEntry *createId;
     static SymtabEntry *addId;
+    static SymtabEntry *finishId;
 
 
     /**

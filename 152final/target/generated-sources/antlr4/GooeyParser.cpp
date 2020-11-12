@@ -1791,6 +1791,10 @@ tree::TerminalNode* GooeyParser::PredefinedRoutineContext::ADD() {
   return getToken(GooeyParser::ADD, 0);
 }
 
+tree::TerminalNode* GooeyParser::PredefinedRoutineContext::FINISH() {
+  return getToken(GooeyParser::FINISH, 0);
+}
+
 
 size_t GooeyParser::PredefinedRoutineContext::getRuleIndex() const {
   return GooeyParser::RulePredefinedRoutine;
@@ -1816,9 +1820,10 @@ GooeyParser::PredefinedRoutineContext* GooeyParser::predefinedRoutine() {
     enterOuterAlt(_localctx, 1);
     setState(256);
     _la = _input->LA(1);
-    if (!(_la == GooeyParser::CREATE
-
-    || _la == GooeyParser::ADD)) {
+    if (!((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & ((1ULL << GooeyParser::CREATE)
+      | (1ULL << GooeyParser::ADD)
+      | (1ULL << GooeyParser::FINISH))) != 0))) {
     _errHandler->recoverInline(this);
     }
     else {
@@ -3214,13 +3219,13 @@ std::vector<std::string> GooeyParser::_literalNames = {
   "", "';'", "'.'", "':'", "','", "'{'", "'}'", "'('", "')'", "'['", "']'", 
   "'-'", "'+'", "'='", "'!'", "'!='", "'<'", "'<='", "'>'", "'>='", "'*'", 
   "'/'", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-  "", "", "", "", "", "'''"
+  "", "", "", "", "", "'\"'"
 };
 
 std::vector<std::string> GooeyParser::_symbolicNames = {
   "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
   "", "", "", "", "GOOEY", "AND", "OR", "WHILE", "FOR", "IF", "ELSE", "TO", 
-  "BY", "VAR", "FUNC", "FIN", "MAIN", "ACT", "CREATE", "ADD", "IDENTIFIER", 
+  "BY", "VAR", "FUNC", "FIN", "MAIN", "CREATE", "ADD", "FINISH", "IDENTIFIER", 
   "INTEGER", "REAL", "NEWLINE", "WS", "QUOTE", "CHARACTER", "STRING", "COMMENT"
 };
 
@@ -3308,7 +3313,7 @@ GooeyParser::Initializer::Initializer() {
     0x28, 0x2a, 0x2c, 0x2e, 0x30, 0x32, 0x34, 0x36, 0x38, 0x3a, 0x3c, 0x3e, 
     0x40, 0x42, 0x44, 0x46, 0x48, 0x4a, 0x4c, 0x4e, 0x50, 0x52, 0x54, 0x56, 
     0x58, 0x5a, 0x5c, 0x5e, 0x60, 0x62, 0x64, 0x2, 0x8, 0x3, 0x2, 0xd, 0xe, 
-    0x3, 0x2, 0x26, 0x27, 0x3, 0x2, 0x29, 0x2a, 0x4, 0x2, 0xf, 0xf, 0x11, 
+    0x3, 0x2, 0x25, 0x27, 0x3, 0x2, 0x29, 0x2a, 0x4, 0x2, 0xf, 0xf, 0x11, 
     0x15, 0x4, 0x2, 0xd, 0xe, 0x1a, 0x1a, 0x4, 0x2, 0x16, 0x17, 0x19, 0x19, 
     0x2, 0x166, 0x2, 0x66, 0x3, 0x2, 0x2, 0x2, 0x4, 0x69, 0x3, 0x2, 0x2, 
     0x2, 0x6, 0x6d, 0x3, 0x2, 0x2, 0x2, 0x8, 0x6f, 0x3, 0x2, 0x2, 0x2, 0xa, 

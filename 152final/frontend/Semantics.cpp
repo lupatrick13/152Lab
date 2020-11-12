@@ -750,6 +750,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	SymtabEntry *varId = ctx->variable()->entry;
 	SymtabEntry *routineId = symtabStack->lookup(routineName);
 	int argSize = ctx->argumentList() != nullptr ? ctx->argumentList()->argument().size() : 0;
+	ctx->routine = routineId;
 
 	//check if fucntion and variables are defined
 	if(varId == nullptr)
@@ -759,7 +760,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	else
 		error.flag(UNDECLARED_IDENTIFIER, ctx->predefinedRoutine());
 
-	if(argSize < 1) error.flag(INVALID_FIELD, ctx);
+	if(argSize < 0) error.flag(INVALID_FIELD, ctx);
 
 	if(varId->getKind() != Kind::VARIABLE){ error.flag(INVALID_TYPE, ctx->variable()); return nullptr;}
 	//some predefined routins can only be used with certain types
@@ -785,8 +786,12 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 			GooeyParser::ExpressionContext *arg2Ctx = ctx->argumentList()->argument(1)->expression();
 			visit(arg1Ctx);
 			visit(arg2Ctx);
+			string argName = toLowerCase(arg1Ctx->getText());
+			SymtabEntry *argId = symtabStack->lookup(argName);
+			if(argId == nullptr) error.flag(UNDECLARED_IDENTIFIER, arg1Ctx);
+			else arg1Ctx->entry = argId;
 			if(arg1Ctx->type->getForm() != Form:: COMPONENT) error.flag(INVALID_TYPE, arg1Ctx);
-			if(toLowerCase(arg1Ctx->getText()) == varId->getName()) error.flag(INVALID_FIELD, arg1Ctx);
+			if( argName == varId->getName()) error.flag(INVALID_FIELD, arg1Ctx);
 			if(arg2Ctx->type->getIdentifier()->getName() != "str")
 			{
 				error.flag(INVALID_TYPE, arg2Ctx);
@@ -796,7 +801,14 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 
 	if(routineName == "create")
 	{
-		if(argSize != 1)
+		string typeName = type->getIdentifier()->getName();
+		if(typeName == "panel" || typeName == "text" )
+				{
+					if( argSize != 0 )
+						error.flag(INVALID_FIELD,ctx);
+					return nullptr;
+				}
+		else if(argSize != 1)
 			error.flag(INVALID_FIELD,ctx);
 		else
 		{
@@ -809,7 +821,17 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 		}
 	}
 
+	if(routineName == "finish")
+	{
+		if(type->getIdentifier()->getName() != "panel")
+			error.flag(INVALID_FIELD, ctx);
+		else if( argSize != 0)
+			error.flag(INVALID_FIELD, ctx);
+
+	}
+
 
 	return nullptr;
 }
+
 } //namespace

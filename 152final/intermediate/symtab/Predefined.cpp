@@ -32,6 +32,7 @@ intermediate::type::Typespec *Predefined::stringType;
 intermediate::type::Typespec *Predefined::buttonType;
 intermediate::type::Typespec *Predefined::labelType;
 intermediate::type::Typespec *Predefined::panelType;
+intermediate::type::Typespec *Predefined::textType;
 intermediate::type::Typespec *Predefined::undefinedType;
 
 // Predefined identifiers.
@@ -43,6 +44,7 @@ SymtabEntry *Predefined::stringId;
 SymtabEntry *Predefined::buttonId;
 SymtabEntry *Predefined::labelId;
 SymtabEntry *Predefined::panelId;
+SymtabEntry *Predefined::textId;
 SymtabEntry *Predefined::falseId;
 SymtabEntry *Predefined::trueId;
 SymtabEntry *Predefined::roundId;
@@ -50,6 +52,7 @@ SymtabEntry *Predefined::succId;
 SymtabEntry *Predefined::truncId;
 SymtabEntry *Predefined::createId;
 SymtabEntry *Predefined::addId;
+SymtabEntry *Predefined::finishId;
 
 void Predefined::initialize(SymtabStack *symtabStack)
 {
@@ -107,6 +110,11 @@ void Predefined::initializeTypes(SymtabStack *symtabStack)
     panelType->setIdentifier(panelId);
     panelId->setType(panelType);
 
+    textId = symtabStack->enterLocal("text", TYPE);
+    textType = new Typespec(COMPONENT);
+    textType->setIdentifier(textId);
+    textId->setType(textType);
+
     // Undefined type.
     undefinedType = new Typespec(SCALAR);
 }
@@ -138,7 +146,7 @@ void Predefined::initializeStandardRoutines(SymtabStack *symtabStack)
     truncId  = enterStandard(symtabStack, FUNCTION,  "trunc",   TRUNC);
     createId = enterStandard(symtabStack, PROCEDURE,  "create",   CREATE);
     addId = enterStandard(symtabStack, PROCEDURE,  "add",   ADD);
-
+    finishId = enterStandard(symtabStack, PROCEDURE,  "finish",  FINISH);
 }
 
 SymtabEntry *Predefined::enterStandard(SymtabStack *symtabStack,

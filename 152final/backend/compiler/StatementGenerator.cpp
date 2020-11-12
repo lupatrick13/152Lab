@@ -195,7 +195,81 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
 
 void StatementGenerator::emitPredefined(GooeyParser::PredefinedRoutineCallContext *ctx)
 {
-
+	string routineName = ctx->routine->getName();
+	GooeyParser::ExpressionContext *expr1 = ctx->argumentList() != nullptr ? ctx->argumentList()->argument(0)->expression() : nullptr;
+	string text = "";
+	SymtabEntry *varId = ctx->variable()->entry;
+	if(routineName == "create") // do the create routine
+	{
+		if(expr1 != nullptr)
+			emitCreate(expr1, varId);
+		else
+			emitCreate(nullptr, varId);
+	}
+	if(routineName == "add")
+	{
+		GooeyParser::ExpressionContext *expr2 = ctx->argumentList()->argument(1)->expression();
+		SymtabEntry *var2Id = expr1->entry;
+		emitAdd(expr2, varId, var2Id);
+	}
+	if(routineName == "finish")
+	{
+		emitAdd(varId);
+	}
 }
 
+void StatementGenerator::emitCreate(GooeyParser::ExpressionContext *title, SymtabEntry *entry)
+{
+	string varName = entry->getName();
+	string object = objectTypeName(entry->getType());
+	string typeName = entry->getType()->getIdentifier()->getName();
+	emitLine();
+	emit(NEW, object);
+	emit(DUP);
+	if(title != nullptr)
+	{
+		compiler->visit(title);
+		emit(INVOKESPECIAL, object + "/<init>(Ljava/lang/String;)V");
+	}
+	else if( typeName== "panel")
+	{
+	    emit(NEW, "java/awt/BorderLayout");
+	    emit(DUP);
+	    emit(INVOKESPECIAL, "java/awt/BorderLayout/<init>()V");
+	    emit(INVOKESPECIAL, "javax/swing/JPanel/<init>(Ljava/awt/LayoutManager;)V");
+
+	}
+	else if(typeName == "text")
+	{
+		emit(INVOKESPECIAL, object + "/<init>()V");
+	}
+    emit(PUTSTATIC, programName + "/" + varName, typeDescriptor(entry));
+}
+void StatementGenerator::emitAdd(GooeyParser::ExpressionContext *title, SymtabEntry *var1, SymtabEntry *var2)
+{
+	string LHSname = var1->getName();
+	string RHSname = var2->getName();
+	string LHStype = typeDescriptor(var1);
+	string RHStype = typeDescriptor(var2);
+	string LHStypesmall = objectTypeName(var1->getType());
+
+	emitLine();
+	emit(GETSTATIC, programName + "/" + LHSname, LHStype);
+	emit(GETSTATIC, programName + "/" + RHSname, RHStype);
+	compiler->visit(title);
+	emit(INVOKEVIRTUAL, LHStypesmall + "/add(Ljava/awt/Component;Ljava/lang/Object;)V");
+
+}
+void StatementGenerator::emitAdd(SymtabEntry *var)
+{
+	string LHSname = var->getName();
+	string LHStype = typeDescriptor(var);
+
+	emitLine();
+	emit(GETSTATIC, programName + "/" + "_mainframe", "Ljavax/swing/JFrame;");
+	emit(GETSTATIC, programName + "/" + LHSname, LHStype);
+	emit(LDC, "\"Center\"");
+	emit(INVOKEVIRTUAL, "javax/swing/JFrame/add(Ljava/awt/Component;Ljava/lang/Object;)V");
+
+}
 }} // namespace backend::compiler

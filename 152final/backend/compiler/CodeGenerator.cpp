@@ -566,6 +566,7 @@ string CodeGenerator::typeDescriptor(Typespec *GooeyType)
     else if (GooeyType == Predefined::buttonType)  str = "Ljavax/swing/JButton;";
     else if (GooeyType == Predefined::panelType)   str = "Ljavax/swing/JPanel;";
     else if (GooeyType == Predefined::labelType)    str = "Ljavax/swing/JLabel;";
+    else if (GooeyType == Predefined::textType)    str = "Ljavax/swing/JTextField;";
     else if (form == ENUMERATION)                  str = "I";
 
 
@@ -597,9 +598,10 @@ string CodeGenerator::objectTypeName(Typespec *GooeyType)
     else if (GooeyType == Predefined::booleanType) str = "java/lang/Boolean";
     else if (GooeyType == Predefined::charType)    str = "java/lang/Character";
     else if (GooeyType == Predefined::stringType)  str = "Ljava/lang/String;";
-    else if (GooeyType == Predefined::buttonType)  str = "Ljavax/swing/JButton;";
-    else if (GooeyType == Predefined::panelType)   str = "Ljavax/swing/JPanel;";
-    else if (GooeyType == Predefined::labelType)    str = "Ljavax/swing/JLabe;l";
+    else if (GooeyType == Predefined::buttonType)  str = "javax/swing/JButton";
+    else if (GooeyType == Predefined::panelType)   str = "javax/swing/JPanel";
+    else if (GooeyType == Predefined::labelType)    str = "javax/swing/JLabel";
+    else if (GooeyType == Predefined::textType)    str = "javax/swing/JTextField";
     else if (form == ENUMERATION)                  str = "java/lang/Integer";
 
     typeName += str;

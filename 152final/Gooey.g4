@@ -11,7 +11,7 @@ grammar Gooey;
 program           : programHeader block;
 programHeader     : GOOEY title ';' ; 
 
-finish:
+finish :
 	FIN;
 title   locals [ SymtabEntry *entry = nullptr ]
     : IDENTIFIER ;
@@ -69,7 +69,8 @@ statement : compoundStatement
 predefinedRoutineCall locals [SymtabEntry *routine = nullptr]
 					:	variable '.' predefinedRoutine '(' argumentList? ')';
 predefinedRoutine	: CREATE
-					| ADD;
+					| ADD
+					| FINISH;
 compoundStatement : '{' statementList '}';
 emptyStatement : ;
      
@@ -86,7 +87,7 @@ whileStatement  : WHILE '(' expression ')' '{' statement '}' ;
 
 forStatement : FOR '(' variable '=' expression TO expression')' '{' statement '}';
 
-expression          locals [ Typespec *type = nullptr ] 
+expression          locals [ Typespec *type = nullptr, SymtabEntry *entry ] 
     : simpleExpression (relOp simpleExpression)? ;
     
 simpleExpression    locals [ Typespec *type = nullptr ] 
@@ -156,9 +157,9 @@ VAR			: V A R;
 FUNC		: F U N C;
 FIN			: F I N;
 MAIN 		: M A I N;
-ACT			: A C T;
 CREATE		: C R E A T E;
 ADD			: A D D;
+FINISH		: F I N I S H;
 
 IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
 INTEGER    : [0-9]+ ;
@@ -168,7 +169,7 @@ REAL       : INTEGER '.' INTEGER ;
 NEWLINE : '\r'? '\n' -> skip  ;
 WS      : [ \t]+ -> skip ; 
 
-QUOTE     : '\'' ;
+QUOTE     : '"' ;
 CHARACTER : QUOTE CHARACTER_CHAR QUOTE ;
 STRING    : QUOTE STRING_CHAR* QUOTE ;
 
@@ -176,7 +177,7 @@ fragment CHARACTER_CHAR : ~('\'')   // any non-quote character
                         ;
 
 fragment STRING_CHAR : QUOTE QUOTE  // two consecutive quotes
-                     | ~('\'')      // any non-quote character
+                     | ~('"')      // any non-quote character
                      ;
 
 COMMENT : '//' COMMENT_CHARACTER* -> skip ;

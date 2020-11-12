@@ -163,6 +163,16 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
         }
         else  // stringMode
         {
+        	string type;
+        	if(type1 != Predefined::stringType)
+        	{
+        		type = typeDescriptor(type1);
+        	}
+        	else if(type2 != Predefined::stringType)
+        	{
+        		type = typeDescriptor(type2);
+        	}
+        	else type = "Ljava/lang/String;";
             emit(NEW, "java/lang/StringBuilder");
             emit(DUP_X1);
             emit(SWAP);
@@ -176,7 +186,7 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
 
             emitTerm(termCtx2);
             emit(INVOKEVIRTUAL,
-                 string("java/lang/StringBuilder/append(Ljava/lang/String;)") +
+                 string("java/lang/StringBuilder/append(") + type + ")" +
                  string("Ljava/lang/StringBuilder;"));
             localStack->decrease(1);
             emit(INVOKEVIRTUAL,

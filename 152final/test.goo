@@ -1,8 +1,10 @@
 GOOEY test; 
 
 var: 	int nums;
-	  panel pan;
-	  label lab;
+	  panel Lpan, Rpan, Upan, Dpan, Opan;
+	  label lab,lab2;
+	  button but, but2;
+	  text 	box1;
 	 .
 func :
 		int number2(){
@@ -12,5 +14,24 @@ func :
 
 main : 
 {
-	pan.add(lab, 'hello'+ nums);
+	Lpan.create();
+	Rpan.create();
+	Upan.create();
+	Dpan.create();
+	Opan.create();
+	box1.create();
+	lab.create("Number of clicks : 0");
+	but.create("Click me!");
+	lab2.create("I am the right side" +number2());
+	but2.create("DO NOT CLICK");
+	Lpan.add(lab, "North");
+	Lpan.add(but,"South");
+	Rpan.add(lab2, "North");
+	Rpan.add(but2, "South");
+	Upan.add(Lpan, "West");
+	Upan.add(Rpan, "East");
+	Dpan.add(box1, "Center");
+	Opan.add(Dpan, "South");
+	Opan.add(Upan, "North");
+	Opan.finish();
 } fin
