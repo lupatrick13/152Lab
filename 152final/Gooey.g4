@@ -11,12 +11,10 @@ grammar Gooey;
 program           : programHeader block;
 programHeader     : GOOEY title ';' ; 
 
-finish :
-	FIN;
 title   locals [ SymtabEntry *entry = nullptr ]
     : IDENTIFIER ;
 
-block         	: declarations '.' (functiondef '.')? MAIN ':'compoundStatement finish;
+block         	: declarations (functiondef)? (actionDef)? MAIN ':'compoundStatement;
 
 declarations locals [ SymtabEntry *entry = nullptr ]	
 	: VAR ':' variableDeclarationsList ;
@@ -25,14 +23,14 @@ variableDeclarationsList : variableDeclarations ( ';' variableDeclarations)* ';'
 variableDeclarations 	: types variableIdentifierList;
 variableIdentifierList	: variableIdentifier ( ',' variableIdentifier)*;
 variableIdentifier		locals [Typespec *type = nullptr, SymtabEntry *entry]
-						: IDENTIFIER modifier?;
+						: IDENTIFIER modifierDeclare?;
 	
 types locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]  
 	: IDENTIFIER;	
 	
 functiondef : FUNC ':' (funcDec)*;
 funcDec locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-	: returnType functionName parameter '{' declarations? statement '}' ;
+	: returnType functionName parameter declarations? compoundStatement ;
 	
 parameter			: '(' parameterDecList? ')' ;
 parameterDecList 	: parameterDec (';' parameterDec)* ;
@@ -47,14 +45,23 @@ returnType locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
 variable locals [Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
 	: IDENTIFIER modifier?;
 	
-modifier : '[' INTEGER ']';
+modifierDeclare : '[' INTEGER ']';
+modifier : '[' expression ']';
+
+actionDef : ACT ':' (actDec)*;
+actDec locals [SymtabEntry *entry = nullptr ]
+	: actionName  compoundStatement ;
+actionName locals[SymtabEntry *entry = nullptr]
+	: IDENTIFIER;
+
 sign : '-' | '+' ;
+
 functionCall : functionName '(' argumentList? ')';
 procedureCall : functionName '(' argumentList? ')';
 functionName    locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ] 
     : IDENTIFIER ;
 argumentList : argument ( ',' argument )* ;
-argument     : expression ;
+argument     : expression | actionName '.';
 
 statement : compoundStatement
           | assignmentStatement
@@ -68,24 +75,22 @@ statement : compoundStatement
 
 predefinedRoutineCall locals [SymtabEntry *routine = nullptr]
 					:	variable '.' predefinedRoutine '(' argumentList? ')';
-predefinedRoutine	: CREATE
-					| ADD
-					| FINISH;
+predefinedRoutine	: IDENTIFIER;
 compoundStatement : '{' statementList '}';
 emptyStatement : ;
      
-statementList       : statement ( ';' statement )* ;
+statementList       : statement ( ';' statement )*;
 assignmentStatement : lhs '=' rhs ';'?;
 
 lhs                 locals [ Typespec *type = nullptr ] 
     : variable ;
 rhs : expression ;
 
-ifStatement    : IF expression '{' statement '}' ( ELSE '{' statement '}')? ;
+ifStatement    : IF '(' expression ')'  statement  ( ELSE  statement )? ;
 
-whileStatement  : WHILE '(' expression ')' '{' statement '}' ;
+whileStatement  : WHILE '(' expression ')' statement ;
 
-forStatement : FOR '(' variable '=' expression TO expression')' '{' statement '}';
+forStatement : FOR '(' variable '=' expression TO expression')'  statement ;
 
 expression          locals [ Typespec *type = nullptr, SymtabEntry *entry ] 
     : simpleExpression (relOp simpleExpression)? ;
@@ -155,11 +160,8 @@ TO			: T O;
 BY			: B Y;
 VAR			: V A R;
 FUNC		: F U N C;
-FIN			: F I N;
 MAIN 		: M A I N;
-CREATE		: C R E A T E;
-ADD			: A D D;
-FINISH		: F I N I S H;
+ACT			: A C T;
 
 IDENTIFIER : [a-zA-Z][a-zA-Z0-9]* ;
 INTEGER    : [0-9]+ ;

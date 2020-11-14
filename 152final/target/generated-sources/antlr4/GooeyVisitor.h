@@ -30,8 +30,6 @@ public:
 
     virtual antlrcpp::Any visitProgramHeader(GooeyParser::ProgramHeaderContext *context) = 0;
 
-    virtual antlrcpp::Any visitFinish(GooeyParser::FinishContext *context) = 0;
-
     virtual antlrcpp::Any visitTitle(GooeyParser::TitleContext *context) = 0;
 
     virtual antlrcpp::Any visitBlock(GooeyParser::BlockContext *context) = 0;
@@ -66,7 +64,15 @@ public:
 
     virtual antlrcpp::Any visitVariable(GooeyParser::VariableContext *context) = 0;
 
+    virtual antlrcpp::Any visitModifierDeclare(GooeyParser::ModifierDeclareContext *context) = 0;
+
     virtual antlrcpp::Any visitModifier(GooeyParser::ModifierContext *context) = 0;
+
+    virtual antlrcpp::Any visitActionDef(GooeyParser::ActionDefContext *context) = 0;
+
+    virtual antlrcpp::Any visitActDec(GooeyParser::ActDecContext *context) = 0;
+
+    virtual antlrcpp::Any visitActionName(GooeyParser::ActionNameContext *context) = 0;
 
     virtual antlrcpp::Any visitSign(GooeyParser::SignContext *context) = 0;
 

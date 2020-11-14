@@ -30,6 +30,8 @@ Object Semantics::visitProgram(GooeyParser::ProgramContext *ctx)
 	visit(ctx->block()->declarations());
 	if(ctx->block()->functiondef() != nullptr)
 		visit(ctx->block()->functiondef());
+	if(ctx->block()->actionDef() != nullptr)
+		visit(ctx->block()->actionDef());
 	visit(ctx->block()->compoundStatement());
 
 	CrossReferencer crossReferencer;
@@ -70,19 +72,21 @@ Object Semantics::visitVariableDeclarations(GooeyParser::VariableDeclarationsCon
         if (variableId == nullptr)
         {
         	variableId = symtabStack->enterLocal(variableName, VARIABLE);
-        	if(idCtx->modifier() == nullptr)
+        	if(idCtx->modifierDeclare() == nullptr)
         	{
 				variableId->setType(typeCtx->type);
         	}
-        	else
-        	{
-        		Typespec *arrayType = new Typespec(ARRAY);
-        		arrayType->setArrayElementCount(stoi(idCtx->modifier()->INTEGER()->getText()));
-        		arrayType->setArrayElementType(typeCtx->type);
-        		arrayType->setArrayIndexType(Predefined::integerType);
-        		arrayType->setIdentifier(typeCtx->type->getIdentifier());
-        		variableId->setType(arrayType);
-        	}
+//        	else
+//        	{
+//        		Typespec *arrayType = new Typespec(ARRAY);
+//        		visit(idCtx->modifier()->expression());
+//        		SymtabEntry *numEntry = idCtx->modifier()->expression()->entry;
+//        		arrayType->setArrayElementCount(numEntry->getValue().as<int>());
+//        		arrayType->setArrayElementType(typeCtx->type);
+//        		arrayType->setArrayIndexType(Predefined::integerType);
+//        		arrayType->setIdentifier(typeCtx->type->getIdentifier());
+//        		variableId->setType(arrayType);
+//        	}
 			// Assign slot numbers to local variables.
 			Symtab *symtab = variableId->getSymtab();
 			if (symtab->getNestingLevel() > 1)
@@ -116,7 +120,11 @@ Object Semantics::visitVariable(GooeyParser::VariableContext *ctx)
 		if(ctx->type->getForm() == Form::ARRAY)
 		{
 			int count = ctx->type->getArrayElementCount();
-			int index =  ctx->modifier() != nullptr ? stoi(ctx->modifier()->INTEGER()->getText()) : -1;
+			int index = -1;
+			if(ctx->modifier()->expression()!= nullptr)
+			{
+			}
+
 			bool inRange = count > index && index >=0;
 			if(inRange)
 				ctx->type = variableId->getType()->getArrayElementType();
@@ -162,6 +170,7 @@ Object Semantics::visitFuncDec(GooeyParser::FuncDecContext *ctx)
 	GooeyParser::ParameterContext *parameters = ctx->parameter();
 	string FuncName;
 	Typespec *returnType = nullptr;
+
 
 	FuncName = toLowerCase(ctx->functionName()->IDENTIFIER()->getText());
 	SymtabEntry *functionId = symtabStack->lookupLocal(FuncName);
@@ -220,8 +229,8 @@ Object Semantics::visitFuncDec(GooeyParser::FuncDecContext *ctx)
 		assocVarId->setType(returnType);
 	}
 
-	visit(ctx->statement());
-	functionId->setExecutable(ctx->statement());
+	visit(ctx->compoundStatement());
+	functionId->setExecutable(ctx->compoundStatement());
 
 	symtabStack->pop();
 	return nullptr;
@@ -304,6 +313,44 @@ Object Semantics::visitReturnType(GooeyParser::ReturnTypeContext *ctx)
 	return nullptr;
 }
 
+Object Semantics::visitActDec(GooeyParser::ActDecContext *ctx)
+{
+	string ActionName = toLowerCase(ctx->actionName()->IDENTIFIER()->getText());
+	SymtabEntry *actionId = symtabStack->lookup(ActionName);
+
+	if(actionId != nullptr)
+		error.flag(REDECLARED_IDENTIFIER, ctx->actionName());
+
+	actionId = symtabStack->enterLocal(ActionName, ACTION);
+
+	actionId->setRoutineCode(DECLARED);
+	ctx->actionName()->entry = actionId;
+
+	SymtabEntry *parentId = symtabStack->getLocalSymtab()->getOwner();
+	parentId->appendSubroutine(actionId);
+
+
+	Symtab *symtab = symtabStack->getLocalSymtab();
+	symtab->setOwner(actionId);
+	actionId->setRoutineSymtab(symtab);
+	ctx->actionName()->entry = actionId;
+	visit(ctx->compoundStatement());
+	actionId->setExecutable(ctx->compoundStatement());
+
+
+	return nullptr;
+}
+
+Object Semantics::visitActionName(GooeyParser::ActionNameContext *ctx)
+{
+	string ActionName = toLowerCase(ctx->IDENTIFIER()->getText());
+	ctx->entry = symtabStack->lookup(ActionName);
+	if(ctx->entry == nullptr)
+	{
+		error.flag(UNDECLARED_IDENTIFIER, ctx);
+	}
+	return nullptr;
+}
 Object Semantics::visitAssignmentStatement(GooeyParser::AssignmentStatementContext *ctx)
 {
 	GooeyParser::LhsContext *lhsCtx = ctx->lhs();
@@ -421,6 +468,7 @@ Object Semantics::visitExpression(GooeyParser::ExpressionContext *ctx)
 		}
 		ctx->type = Predefined::booleanType;
 	}
+
 	return nullptr;
 }
 
@@ -782,24 +830,24 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 			error.flag(INVALID_FIELD, ctx);
 		else
 		{
-			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
-			GooeyParser::ExpressionContext *arg2Ctx = ctx->argumentList()->argument(1)->expression();
-			visit(arg1Ctx);
-			visit(arg2Ctx);
+			GooeyParser::ArgumentContext *arg1Ctx = ctx->argumentList()->argument(0);
+			GooeyParser::ArgumentContext *arg2Ctx = ctx->argumentList()->argument(1);
+			visit(arg1Ctx->expression());
+			visit(arg2Ctx->expression());
 			string argName = toLowerCase(arg1Ctx->getText());
 			SymtabEntry *argId = symtabStack->lookup(argName);
 			if(argId == nullptr) error.flag(UNDECLARED_IDENTIFIER, arg1Ctx);
-			else arg1Ctx->entry = argId;
-			if(arg1Ctx->type->getForm() != Form:: COMPONENT) error.flag(INVALID_TYPE, arg1Ctx);
+			else arg1Ctx->expression()->entry = argId;
+			if(arg1Ctx->expression()->type->getForm() != Form:: COMPONENT) error.flag(INVALID_TYPE, arg1Ctx);
 			if( argName == varId->getName()) error.flag(INVALID_FIELD, arg1Ctx);
-			if(arg2Ctx->type->getIdentifier()->getName() != "str")
+			if(arg2Ctx->expression()->type->getIdentifier()->getName() != "str")
 			{
 				error.flag(INVALID_TYPE, arg2Ctx);
 			}
 		}
 	}
 
-	if(routineName == "create")
+	else if(routineName == "create")
 	{
 		string typeName = type->getIdentifier()->getName();
 		if(typeName == "panel" || typeName == "text" )
@@ -821,17 +869,65 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 		}
 	}
 
-	if(routineName == "finish")
+	else if(routineName == "finish")
 	{
 		if(type->getIdentifier()->getName() != "panel")
 			error.flag(INVALID_FIELD, ctx);
-		else if( argSize != 0)
+		else if( argSize != 1)
+		{
 			error.flag(INVALID_FIELD, ctx);
+		}
+		else if(argSize == 1)
+		{
+			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
+			visit(arg1Ctx);
+			if(arg1Ctx->type->getIdentifier()->getName() != "str")
+			{
+				error.flag(INVALID_TYPE, arg1Ctx);
+			}
+		}
 
 	}
 
+	else if(routineName == "addaction")
+	{
+		if(type->getIdentifier()->getName() != "button")
+			error.flag(INVALID_FIELD, ctx);
+		else if( argSize != 1)
+		{
+			error.flag(INVALID_FIELD, ctx);
+		}
+		else if(argSize == 1)
+		{
+			if(ctx->argumentList()->argument(0)->actionName() == nullptr)
+				error.flag(INVALID_FIELD,ctx);
+			else
+			{
+				GooeyParser::ActionNameContext *arg1Ctx = ctx->argumentList()->argument(0)->actionName();
+				visit(arg1Ctx);
+			}
+		}
+	}
+
+	else if(routineName == "settext")
+	{
+		if(type->getIdentifier()->getName() != "label")
+			error.flag(INVALID_FIELD, ctx);
+		else if( argSize != 1)
+		{
+			error.flag(INVALID_FIELD, ctx);
+		}
+		else if(argSize == 1)
+		{
+			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
+			visit(arg1Ctx);
+		}
+	}
+	else
+		error.flag(INVALID_FUNCTION, ctx->predefinedRoutine());
 
 	return nullptr;
 }
+
 
 } //namespace

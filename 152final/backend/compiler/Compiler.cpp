@@ -19,6 +19,12 @@ Object Compiler::visitFuncDec(
     return nullptr;
 }
 
+Object Compiler::visitActDec( GooeyParser::ActDecContext *ctx)
+{
+	programCode->emitAction(ctx);
+	return nullptr;
+}
+
 Object Compiler::visitStatement(GooeyParser::StatementContext *ctx)
 {
     if (   (ctx->compoundStatement() == nullptr)

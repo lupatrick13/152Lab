@@ -50,9 +50,13 @@ SymtabEntry *Predefined::trueId;
 SymtabEntry *Predefined::roundId;
 SymtabEntry *Predefined::succId;
 SymtabEntry *Predefined::truncId;
+
+//new identifiers
 SymtabEntry *Predefined::createId;
 SymtabEntry *Predefined::addId;
 SymtabEntry *Predefined::finishId;
+SymtabEntry *Predefined::addActionId;
+SymtabEntry *Predefined::setTextId;
 
 void Predefined::initialize(SymtabStack *symtabStack)
 {
@@ -145,8 +149,10 @@ void Predefined::initializeStandardRoutines(SymtabStack *symtabStack)
     succId   = enterStandard(symtabStack, FUNCTION,  "succ",    SUCC);
     truncId  = enterStandard(symtabStack, FUNCTION,  "trunc",   TRUNC);
     createId = enterStandard(symtabStack, PROCEDURE,  "create",   CREATE);
-    addId = enterStandard(symtabStack, PROCEDURE,  "add",   ADD);
+    addId 	 = enterStandard(symtabStack, PROCEDURE,  "add",   ADD);
     finishId = enterStandard(symtabStack, PROCEDURE,  "finish",  FINISH);
+    addActionId = enterStandard(symtabStack, PROCEDURE,  "addaction",  ADDACTION);
+    setTextId = enterStandard(symtabStack, PROCEDURE,  "settext",  SETTEXT);
 }
 
 SymtabEntry *Predefined::enterStandard(SymtabStack *symtabStack,

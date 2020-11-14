@@ -134,6 +134,8 @@ public:
     Object visitProcedureCall(GooeyParser::ProcedureCallContext *ctx)				override;
     Object visitFunctionCallFactor( GooeyParser::FunctionCallFactorContext *ctx)	override;
     Object visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallContext *ctx) override;
+    Object visitActDec(GooeyParser::ActDecContext *ctx)								override;
+    Object visitActionName(GooeyParser::ActionNameContext *ctx)						override;
 };
 
 } // namespace frontend

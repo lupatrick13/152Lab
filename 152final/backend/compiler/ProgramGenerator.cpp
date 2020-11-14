@@ -20,8 +20,12 @@ void ProgramGenerator::emitProgram(GooeyParser::ProgramContext *ctx)
 
     localVariables = new LocalVariables(programLocalsCount);
 
+    if(ctx->block()->actionDef()!= nullptr)
+    	emitActions(ctx->block()->actionDef());
+
     emitRecords(programSymtab);
 
+    emitDirective(SOURCE, programName);
     emitDirective(CLASS_PUBLIC, programName);
     emitDirective(SUPER, "java/lang/Object");
 
@@ -29,7 +33,9 @@ void ProgramGenerator::emitProgram(GooeyParser::ProgramContext *ctx)
     emitProgramVariables();
     emitInputScanner();
     emitConstructor();
-    emitSubroutines(ctx->block()->functiondef());
+    if(ctx->block()->functiondef()!= nullptr)
+    	emitSubroutines(ctx->block()->functiondef());
+
 
     emitMainMethod(ctx);
 }
@@ -39,6 +45,15 @@ void ProgramGenerator::emitSubroutines(GooeyParser::FunctiondefContext *ctx){
 		for(GooeyParser::FuncDecContext *defnCtx : ctx->funcDec())
 		{
 			compiler = new Compiler(compiler);
+			compiler->visit(defnCtx);
+		}
+	}
+}
+void ProgramGenerator::emitActions(GooeyParser::ActionDefContext *ctx){
+	if(ctx != nullptr)
+	{
+		for(GooeyParser::ActDecContext *defnCtx : ctx->actDec())
+		{
 			compiler->visit(defnCtx);
 		}
 	}
@@ -53,6 +68,12 @@ void ProgramGenerator::emitRecords(Symtab *symtab)
             new Compiler(compiler, id);
         }
     }
+}
+void ProgramGenerator::emitAction(GooeyParser::ActDecContext *ctx)
+{
+	SymtabEntry *actionId = ctx->actionName()->entry;
+	string actionName = actionId->getName();
+	new Compiler(compiler, programName, actionName, ctx);
 }
 
 void ProgramGenerator::emitRecord(SymtabEntry *recordId, string namePath)
@@ -87,7 +108,7 @@ void ProgramGenerator::emitProgramVariables()
     {
         if (id->getKind() == VARIABLE)
         {
-            emitDirective(FIELD_PRIVATE_STATIC, id->getName(),
+            emitDirective(FIELD_PROTECTED_STATIC, id->getName(),
                           typeDescriptor(id));
         }
     }
@@ -257,12 +278,11 @@ void ProgramGenerator::emitRoutine(GooeyParser::FuncDecContext *ctx)
     // Generate code to allocate any arrays, records, and strings.
     StructuredDataGenerator structuredCode(this, compiler);
     structuredCode.emitData(routineId);
-
     localVariables = new LocalVariables(routineSymtab->getMaxSlotNumber());
 
     // Emit code for the compound statement.
-    GooeyParser::StatementContext *stmtCtx =
-        (GooeyParser::StatementContext *) routineId->getExecutable();
+    GooeyParser::CompoundStatementContext *stmtCtx =
+        (GooeyParser::CompoundStatementContext *) routineId->getExecutable();
     compiler->visit(stmtCtx);
 
     emitRoutineReturn(routineId);

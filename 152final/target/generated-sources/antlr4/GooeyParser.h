@@ -23,26 +23,27 @@ public:
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
     T__20 = 21, GOOEY = 22, AND = 23, OR = 24, WHILE = 25, FOR = 26, IF = 27, 
-    ELSE = 28, TO = 29, BY = 30, VAR = 31, FUNC = 32, FIN = 33, MAIN = 34, 
-    CREATE = 35, ADD = 36, FINISH = 37, IDENTIFIER = 38, INTEGER = 39, REAL = 40, 
-    NEWLINE = 41, WS = 42, QUOTE = 43, CHARACTER = 44, STRING = 45, COMMENT = 46
+    ELSE = 28, TO = 29, BY = 30, VAR = 31, FUNC = 32, MAIN = 33, ACT = 34, 
+    IDENTIFIER = 35, INTEGER = 36, REAL = 37, NEWLINE = 38, WS = 39, QUOTE = 40, 
+    CHARACTER = 41, STRING = 42, COMMENT = 43
   };
 
   enum {
-    RuleProgram = 0, RuleProgramHeader = 1, RuleFinish = 2, RuleTitle = 3, 
-    RuleBlock = 4, RuleDeclarations = 5, RuleVariableDeclarationsList = 6, 
-    RuleVariableDeclarations = 7, RuleVariableIdentifierList = 8, RuleVariableIdentifier = 9, 
-    RuleTypes = 10, RuleFunctiondef = 11, RuleFuncDec = 12, RuleParameter = 13, 
-    RuleParameterDecList = 14, RuleParameterDec = 15, RuleParameterIdList = 16, 
-    RuleParameterId = 17, RuleReturnType = 18, RuleVariable = 19, RuleModifier = 20, 
-    RuleSign = 21, RuleFunctionCall = 22, RuleProcedureCall = 23, RuleFunctionName = 24, 
-    RuleArgumentList = 25, RuleArgument = 26, RuleStatement = 27, RulePredefinedRoutineCall = 28, 
-    RulePredefinedRoutine = 29, RuleCompoundStatement = 30, RuleEmptyStatement = 31, 
-    RuleStatementList = 32, RuleAssignmentStatement = 33, RuleLhs = 34, 
-    RuleRhs = 35, RuleIfStatement = 36, RuleWhileStatement = 37, RuleForStatement = 38, 
-    RuleExpression = 39, RuleSimpleExpression = 40, RuleTerm = 41, RuleFactor = 42, 
-    RuleNumber = 43, RuleUnsignedNumber = 44, RuleCharacterConstant = 45, 
-    RuleStringConstant = 46, RuleRelOp = 47, RuleAddOp = 48, RuleMulOp = 49
+    RuleProgram = 0, RuleProgramHeader = 1, RuleTitle = 2, RuleBlock = 3, 
+    RuleDeclarations = 4, RuleVariableDeclarationsList = 5, RuleVariableDeclarations = 6, 
+    RuleVariableIdentifierList = 7, RuleVariableIdentifier = 8, RuleTypes = 9, 
+    RuleFunctiondef = 10, RuleFuncDec = 11, RuleParameter = 12, RuleParameterDecList = 13, 
+    RuleParameterDec = 14, RuleParameterIdList = 15, RuleParameterId = 16, 
+    RuleReturnType = 17, RuleVariable = 18, RuleModifierDeclare = 19, RuleModifier = 20, 
+    RuleActionDef = 21, RuleActDec = 22, RuleActionName = 23, RuleSign = 24, 
+    RuleFunctionCall = 25, RuleProcedureCall = 26, RuleFunctionName = 27, 
+    RuleArgumentList = 28, RuleArgument = 29, RuleStatement = 30, RulePredefinedRoutineCall = 31, 
+    RulePredefinedRoutine = 32, RuleCompoundStatement = 33, RuleEmptyStatement = 34, 
+    RuleStatementList = 35, RuleAssignmentStatement = 36, RuleLhs = 37, 
+    RuleRhs = 38, RuleIfStatement = 39, RuleWhileStatement = 40, RuleForStatement = 41, 
+    RuleExpression = 42, RuleSimpleExpression = 43, RuleTerm = 44, RuleFactor = 45, 
+    RuleNumber = 46, RuleUnsignedNumber = 47, RuleCharacterConstant = 48, 
+    RuleStringConstant = 49, RuleRelOp = 50, RuleAddOp = 51, RuleMulOp = 52
   };
 
   GooeyParser(antlr4::TokenStream *input);
@@ -57,7 +58,6 @@ public:
 
   class ProgramContext;
   class ProgramHeaderContext;
-  class FinishContext;
   class TitleContext;
   class BlockContext;
   class DeclarationsContext;
@@ -75,7 +75,11 @@ public:
   class ParameterIdContext;
   class ReturnTypeContext;
   class VariableContext;
+  class ModifierDeclareContext;
   class ModifierContext;
+  class ActionDefContext;
+  class ActDecContext;
+  class ActionNameContext;
   class SignContext;
   class FunctionCallContext;
   class ProcedureCallContext;
@@ -134,19 +138,6 @@ public:
 
   ProgramHeaderContext* programHeader();
 
-  class  FinishContext : public antlr4::ParserRuleContext {
-  public:
-    FinishContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *FIN();
-
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  FinishContext* finish();
-
   class  TitleContext : public antlr4::ParserRuleContext {
   public:
     SymtabEntry * entry = nullptr;
@@ -168,8 +159,8 @@ public:
     DeclarationsContext *declarations();
     antlr4::tree::TerminalNode *MAIN();
     CompoundStatementContext *compoundStatement();
-    FinishContext *finish();
     FunctiondefContext *functiondef();
+    ActionDefContext *actionDef();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -242,7 +233,7 @@ public:
     VariableIdentifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *IDENTIFIER();
-    ModifierContext *modifier();
+    ModifierDeclareContext *modifierDeclare();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -290,7 +281,7 @@ public:
     ReturnTypeContext *returnType();
     FunctionNameContext *functionName();
     ParameterContext *parameter();
-    StatementContext *statement();
+    CompoundStatementContext *compoundStatement();
     DeclarationsContext *declarations();
 
 
@@ -401,9 +392,9 @@ public:
 
   VariableContext* variable();
 
-  class  ModifierContext : public antlr4::ParserRuleContext {
+  class  ModifierDeclareContext : public antlr4::ParserRuleContext {
   public:
-    ModifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    ModifierDeclareContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *INTEGER();
 
@@ -412,7 +403,64 @@ public:
    
   };
 
+  ModifierDeclareContext* modifierDeclare();
+
+  class  ModifierContext : public antlr4::ParserRuleContext {
+  public:
+    ModifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ExpressionContext *expression();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
   ModifierContext* modifier();
+
+  class  ActionDefContext : public antlr4::ParserRuleContext {
+  public:
+    ActionDefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *ACT();
+    std::vector<ActDecContext *> actDec();
+    ActDecContext* actDec(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ActionDefContext* actionDef();
+
+  class  ActDecContext : public antlr4::ParserRuleContext {
+  public:
+    SymtabEntry * entry = nullptr;
+    ActDecContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    ActionNameContext *actionName();
+    CompoundStatementContext *compoundStatement();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ActDecContext* actDec();
+
+  class  ActionNameContext : public antlr4::ParserRuleContext {
+  public:
+    SymtabEntry * entry = nullptr;
+    ActionNameContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IDENTIFIER();
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ActionNameContext* actionName();
 
   class  SignContext : public antlr4::ParserRuleContext {
   public:
@@ -488,6 +536,7 @@ public:
     ArgumentContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     ExpressionContext *expression();
+    ActionNameContext *actionName();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -536,9 +585,7 @@ public:
   public:
     PredefinedRoutineContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *CREATE();
-    antlr4::tree::TerminalNode *ADD();
-    antlr4::tree::TerminalNode *FINISH();
+    antlr4::tree::TerminalNode *IDENTIFIER();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

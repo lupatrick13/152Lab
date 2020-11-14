@@ -5,15 +5,37 @@ var: 	int nums;
 	  label lab,lab2;
 	  button but, but2;
 	  text 	box1;
-	 .
 func :
-		int number2(){
-		number2 = 2;
+		int number2()
+		var: int temp;
+		{
+			temp = 2;
+			number2 = temp;
 		}
-.
-
+		void initialize(int i)
+		var: label testlabel;
+			panel yo;
+		{
+			yo.create();
+			testlabel.create("TESTIITIITI" + i);
+			yo.add(testlabel,"North");
+			yo.finish("South");
+		}
+act :
+	button1click
+	{
+		nums = nums + 1;
+		lab.setText("Clicked: " + nums);
+	}
+	button2click
+	{
+		nums = nums+2;
+		lab2.setText("Clicked: " +nums);
+	}
 main : 
 {
+	nums = 0;
+	initialize(100);
 	Lpan.create();
 	Rpan.create();
 	Upan.create();
@@ -22,8 +44,17 @@ main :
 	box1.create();
 	lab.create("Number of clicks : 0");
 	but.create("Click me!");
-	lab2.create("I am the right side" +number2());
+	but.addAction(button1click.);
+	for(nums = 5 to 10)
+	{
+	nums = nums + 1;
+	};
+
+	if(nums > 9){
+	lab2.create("I am the right side" + nums);
+	};
 	but2.create("DO NOT CLICK");
+	but2.addAction(button2click.);
 	Lpan.add(lab, "North");
 	Lpan.add(but,"South");
 	Rpan.add(lab2, "North");
@@ -33,5 +64,5 @@ main :
 	Dpan.add(box1, "Center");
 	Opan.add(Dpan, "South");
 	Opan.add(Upan, "North");
-	Opan.finish();
-} fin
+	Opan.finish("North");
+}

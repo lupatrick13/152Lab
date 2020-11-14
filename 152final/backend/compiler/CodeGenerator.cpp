@@ -149,7 +149,6 @@ void CodeGenerator::emit(Instruction instruction)
 {
     *objectFile << "\t" << instruction << endl;
     objectFile->flush();
-
     localStack->increase(stackUse(instruction));
     ++count;
 }

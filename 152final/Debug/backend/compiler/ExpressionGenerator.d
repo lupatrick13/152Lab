@@ -172,7 +172,8 @@ backend/compiler/ExpressionGenerator.o: \
   ../backend/compiler/LocalStack.h \
   ../backend/compiler/ExpressionGenerator.h \
   ../backend/compiler/Compiler.h ../backend/compiler/ProgramGenerator.h \
-  ../backend/compiler/StatementGenerator.h
+  ../backend/compiler/StatementGenerator.h \
+  ../backend/compiler/ActionGenerator.h
 
 /Users/patrick/eclipse-workspace/152final/target/generated-sources/antlr4/GooeyBaseVisitor.h:
 
@@ -527,3 +528,5 @@ backend/compiler/ExpressionGenerator.o: \
 ../backend/compiler/ProgramGenerator.h:
 
 ../backend/compiler/StatementGenerator.h:
+
+../backend/compiler/ActionGenerator.h:

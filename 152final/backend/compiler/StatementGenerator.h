@@ -53,8 +53,10 @@ public:
     void emitFunctionCall(GooeyParser::FunctionCallContext *ctx);
     void emitProcedureCall(GooeyParser::ProcedureCallContext *ctx);
     void emitPredefined(GooeyParser::PredefinedRoutineCallContext *ctx);
-    void emitAdd(SymtabEntry *var1);
+    void emitAdd(SymtabEntry *var1, GooeyParser::ExpressionContext *title);
     void emitAdd(GooeyParser::ExpressionContext *title, SymtabEntry *var1, SymtabEntry *var2);
+    void emitSetText(GooeyParser::ExpressionContext *text, SymtabEntry *var);
+    void emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var);
 private:
 
 

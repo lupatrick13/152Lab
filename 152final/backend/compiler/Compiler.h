@@ -10,6 +10,7 @@
 #include "ProgramGenerator.h"
 #include "StatementGenerator.h"
 #include "ExpressionGenerator.h"
+#include "ActionGenerator.h"
 
 namespace backend { namespace compiler {
 
@@ -29,6 +30,7 @@ private:
     ProgramGenerator    *programCode;     // program code generator
     StatementGenerator  *statementCode;   // statement code generator
     ExpressionGenerator *expressionCode;  // expression code generator
+    ActionGenerator 	*actionCode;
 
 public:
     /**
@@ -39,7 +41,7 @@ public:
         : programId(programId), programName(programId->getName()),
           code(new CodeGenerator(programName, "j", this)),
           programCode(nullptr), statementCode(nullptr),
-          expressionCode(nullptr) {}
+          expressionCode(nullptr), actionCode(nullptr) {}
 
     /**
      * Constructor for child compilers of procedures and functions.
@@ -48,7 +50,7 @@ public:
     Compiler(Compiler *parent)
         : programId(parent->programId), programName(parent->programName),
           code(parent->code), programCode(parent->programCode),
-          statementCode(nullptr), expressionCode(nullptr) {}
+          statementCode(nullptr), expressionCode(nullptr), actionCode(nullptr) {}
 
     /**
      * Constructor for child compilers of records.
@@ -64,6 +66,14 @@ public:
         programCode->emitRecord(recordId, recordTypePath);
     }
 
+    Compiler(Compiler *parent, string baseProgramName, string actionName, GooeyParser::ActDecContext *ctx)
+    {
+    	string actionFile = baseProgramName + "_" + actionName;
+    	code = new CodeGenerator(baseProgramName, "j", this, actionName);
+    	createNewGenerators(code);
+    	createNewAction(baseProgramName, actionName, "j", code);
+    	actionCode->emitAction(ctx);
+    }
     /**
      * Get the name of the object (Jasmin) file.
      * @return the file name.
@@ -72,6 +82,7 @@ public:
 
     Object visitProgram(GooeyParser::ProgramContext *ctx) override;
     Object visitFuncDec(GooeyParser::FuncDecContext *ctx) override;
+    Object visitActDec( GooeyParser::ActDecContext *ctx) override;
     Object visitStatement(GooeyParser::StatementContext *ctx) override;
     Object visitAssignmentStatement(GooeyParser::AssignmentStatementContext *ctx) override;
     Object visitIfStatement(GooeyParser::IfStatementContext *ctx) override;
@@ -101,6 +112,10 @@ private:
         programCode    = new ProgramGenerator(parentGenerator, this);
         statementCode  = new StatementGenerator(programCode, this);
         expressionCode = new ExpressionGenerator(programCode, this);
+    }
+    void createNewAction(string programName, string actionName, string suffix, CodeGenerator *parentGenerator)
+    {
+    	actionCode = new ActionGenerator(programName, actionName, suffix, this, parentGenerator);
     }
 };
 

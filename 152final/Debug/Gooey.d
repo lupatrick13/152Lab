@@ -181,7 +181,8 @@ Gooey.o: ../Gooey.cpp \
   /Users/patrick/eclipse-workspace/152final/backend/compiler/LocalVariables.h \
   /Users/patrick/eclipse-workspace/152final/backend/compiler/LocalStack.h \
   /Users/patrick/eclipse-workspace/152final/backend/compiler/StatementGenerator.h \
-  /Users/patrick/eclipse-workspace/152final/backend/compiler/ExpressionGenerator.h
+  /Users/patrick/eclipse-workspace/152final/backend/compiler/ExpressionGenerator.h \
+  /Users/patrick/eclipse-workspace/152final/backend/compiler/ActionGenerator.h
 
 /Users/patrick/ANTLR-4.8/antlr4-runtime/antlr4-runtime.h:
 
@@ -548,3 +549,5 @@ Gooey.o: ../Gooey.cpp \
 /Users/patrick/eclipse-workspace/152final/backend/compiler/StatementGenerator.h:
 
 /Users/patrick/eclipse-workspace/152final/backend/compiler/ExpressionGenerator.h:
+
+/Users/patrick/eclipse-workspace/152final/backend/compiler/ActionGenerator.h:

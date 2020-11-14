@@ -4,6 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../backend/compiler/ActionGenerator.cpp \
 ../backend/compiler/CodeGenerator.cpp \
 ../backend/compiler/Compiler.cpp \
 ../backend/compiler/ExpressionGenerator.cpp \
@@ -12,6 +13,7 @@ CPP_SRCS += \
 ../backend/compiler/StructuredDataGenerator.cpp 
 
 OBJS += \
+./backend/compiler/ActionGenerator.o \
 ./backend/compiler/CodeGenerator.o \
 ./backend/compiler/Compiler.o \
 ./backend/compiler/ExpressionGenerator.o \
@@ -20,6 +22,7 @@ OBJS += \
 ./backend/compiler/StructuredDataGenerator.o 
 
 CPP_DEPS += \
+./backend/compiler/ActionGenerator.d \
 ./backend/compiler/CodeGenerator.d \
 ./backend/compiler/Compiler.d \
 ./backend/compiler/ExpressionGenerator.d \

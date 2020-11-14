@@ -59,6 +59,13 @@ public:
 	{
     	open(programName, suffix);
 	}
+    CodeGenerator(string programName, string suffix, Compiler *compiler, string actionName)
+        : objectFile(nullptr), programName(programName),
+          localVariables(nullptr), localStack(nullptr),
+          compiler(nullptr)
+	{
+    	open(programName + "_" + actionName, suffix);
+	}
 
     /**
      * Constructor for code generator subclasses.

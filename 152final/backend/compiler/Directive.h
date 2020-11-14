@@ -17,11 +17,15 @@ using namespace std;
 
 enum class Directive
 {
+	SOURCE,
+	CLASS,
     CLASS_PUBLIC,
     END_CLASS,
     SUPER,
+	IMPLEMENTS,
     FIELD,
     FIELD_PRIVATE_STATIC,
+	FIELD_PROTECTED_STATIC,
     METHOD_PUBLIC,
     METHOD_STATIC,
     METHOD_PUBLIC_STATIC,
@@ -35,11 +39,15 @@ enum class Directive
 
 static const string DIRECTIVE_STRINGS[] =
 {
+	".source",
+	".class",
     ".class public",
     ".end class",
     ".super",
+	".implements",
     ".field",
     ".field private static",
+	".field protected static",
     ".method public",
     ".method static",
     ".method public static",
@@ -51,11 +59,15 @@ static const string DIRECTIVE_STRINGS[] =
     ".line",
 };
 
+constexpr Directive SOURCE				  = Directive::SOURCE;
+constexpr Directive CLASS				  = Directive::CLASS;
 constexpr Directive CLASS_PUBLIC          = Directive::CLASS_PUBLIC;
 constexpr Directive END_CLASS             = Directive::END_CLASS;
 constexpr Directive SUPER                 = Directive::SUPER;
+constexpr Directive IMPLEMENTS			  = Directive::IMPLEMENTS;
 constexpr Directive FIELD                 = Directive::FIELD;
 constexpr Directive FIELD_PRIVATE_STATIC  = Directive::FIELD_PRIVATE_STATIC;
+constexpr Directive FIELD_PROTECTED_STATIC  = Directive::FIELD_PROTECTED_STATIC;
 constexpr Directive METHOD_PUBLIC         = Directive::METHOD_PUBLIC;
 constexpr Directive METHOD_STATIC         = Directive::METHOD_STATIC;
 constexpr Directive METHOD_PUBLIC_STATIC  = Directive::METHOD_PUBLIC_STATIC;

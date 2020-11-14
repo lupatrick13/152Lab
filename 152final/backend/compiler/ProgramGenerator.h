@@ -35,6 +35,7 @@ public:
      */
     void emitRecords(Symtab *symtab);
 
+    void emitAction(GooeyParser::ActDecContext *ctx);
     /*
      * Emit code for a record.
      */
@@ -67,6 +68,7 @@ private:
      * Emit code for the program body as the main method.
      * @param *ctx the ProgramContext.
      */
+    void emitActions(GooeyParser::ActionDefContext *ctx);
     void emitMainMethod(GooeyParser::ProgramContext *ctx);
 
     /*

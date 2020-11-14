@@ -172,7 +172,8 @@ backend/compiler/Compiler.o: ../backend/compiler/Compiler.cpp \
   ../backend/compiler/Instruction.h ../backend/compiler/LocalVariables.h \
   ../backend/compiler/LocalStack.h \
   ../backend/compiler/StatementGenerator.h \
-  ../backend/compiler/ExpressionGenerator.h
+  ../backend/compiler/ExpressionGenerator.h \
+  ../backend/compiler/ActionGenerator.h
 
 /Users/patrick/eclipse-workspace/152final/intermediate/symtab/Predefined.h:
 
@@ -527,3 +528,5 @@ backend/compiler/Compiler.o: ../backend/compiler/Compiler.cpp \
 ../backend/compiler/StatementGenerator.h:
 
 ../backend/compiler/ExpressionGenerator.h:
+
+../backend/compiler/ActionGenerator.h:

@@ -30,10 +30,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitFinish(GooeyParser::FinishContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitTitle(GooeyParser::TitleContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -102,7 +98,23 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitModifierDeclare(GooeyParser::ModifierDeclareContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitModifier(GooeyParser::ModifierContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitActionDef(GooeyParser::ActionDefContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitActDec(GooeyParser::ActDecContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitActionName(GooeyParser::ActionNameContext *ctx) override {
     return visitChildren(ctx);
   }
 

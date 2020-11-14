@@ -149,7 +149,6 @@ void StatementGenerator::emitProcedureCall(GooeyParser::ProcedureCallContext *ct
 {
     /***** Complete this member function. *****/
 	SymtabEntry *routineId = ctx->functionName()->entry;
-	cout << ctx->functionName()->entry << endl;
 	GooeyParser::ArgumentListContext *argListCtx = ctx->argumentList();
 	emitCall(routineId, argListCtx);
 }
@@ -196,7 +195,21 @@ void StatementGenerator::emitCall(SymtabEntry *routineId,
 void StatementGenerator::emitPredefined(GooeyParser::PredefinedRoutineCallContext *ctx)
 {
 	string routineName = ctx->routine->getName();
-	GooeyParser::ExpressionContext *expr1 = ctx->argumentList() != nullptr ? ctx->argumentList()->argument(0)->expression() : nullptr;
+	GooeyParser::ExpressionContext *expr1 = nullptr;
+	GooeyParser::ActionNameContext *action = nullptr;
+	if(ctx->argumentList()!= nullptr)
+	{
+
+		if(ctx->argumentList()->argument(0)->expression() != nullptr)
+		{
+			expr1 = ctx->argumentList()->argument(0)->expression();
+		}
+		else if(ctx->argumentList()->argument(0)->actionName() != nullptr)
+		{
+			action = ctx->argumentList()->argument(0)->actionName();
+		}
+
+	}
 	string text = "";
 	SymtabEntry *varId = ctx->variable()->entry;
 	if(routineName == "create") // do the create routine
@@ -214,7 +227,16 @@ void StatementGenerator::emitPredefined(GooeyParser::PredefinedRoutineCallContex
 	}
 	if(routineName == "finish")
 	{
-		emitAdd(varId);
+		emitAdd(varId, expr1);
+	}
+	if(routineName == "settext")
+	{
+		emitSetText(expr1, varId);
+	}
+	if(routineName == "addaction")
+	{
+
+		emitAddAction(action, varId);
 	}
 }
 
@@ -223,7 +245,11 @@ void StatementGenerator::emitCreate(GooeyParser::ExpressionContext *title, Symta
 	string varName = entry->getName();
 	string object = objectTypeName(entry->getType());
 	string typeName = entry->getType()->getIdentifier()->getName();
+    int nestingLevel = entry->getSymtab()->getNestingLevel();
+    int slot = entry->getSlotNumber();
+
 	emitLine();
+
 	emit(NEW, object);
 	emit(DUP);
 	if(title != nullptr)
@@ -243,7 +269,13 @@ void StatementGenerator::emitCreate(GooeyParser::ExpressionContext *title, Symta
 	{
 		emit(INVOKESPECIAL, object + "/<init>()V");
 	}
-    emit(PUTSTATIC, programName + "/" + varName, typeDescriptor(entry));
+	if(nestingLevel == 1)
+		emit(PUTSTATIC, programName + "/" + varName, typeDescriptor(entry));
+	else
+	{
+		emitRangeCheck(entry->getType());
+		emitStoreLocal(entry->getType(), slot);
+	}
 }
 void StatementGenerator::emitAdd(GooeyParser::ExpressionContext *title, SymtabEntry *var1, SymtabEntry *var2)
 {
@@ -252,24 +284,69 @@ void StatementGenerator::emitAdd(GooeyParser::ExpressionContext *title, SymtabEn
 	string LHStype = typeDescriptor(var1);
 	string RHStype = typeDescriptor(var2);
 	string LHStypesmall = objectTypeName(var1->getType());
+    int nestingLevel = var1->getSymtab()->getNestingLevel();
+    int slot1 = var1->getSlotNumber();
+    int slot2 = var2->getSlotNumber();
+    emitLine();
+    if(nestingLevel == 1)
+    {
 
-	emitLine();
-	emit(GETSTATIC, programName + "/" + LHSname, LHStype);
-	emit(GETSTATIC, programName + "/" + RHSname, RHStype);
-	compiler->visit(title);
-	emit(INVOKEVIRTUAL, LHStypesmall + "/add(Ljava/awt/Component;Ljava/lang/Object;)V");
+		emit(GETSTATIC, programName + "/" + LHSname, LHStype);
+		emit(GETSTATIC, programName + "/" + RHSname, RHStype);
+		compiler->visit(title);
+		emit(INVOKEVIRTUAL, LHStypesmall + "/add(Ljava/awt/Component;Ljava/lang/Object;)V");
+    }
+    else
+    {
+		emitLoadLocal(var1->getType(), slot1);
+    	emitLoadLocal(var2->getType(), slot2);
+		compiler->visit(title);
+		emit(INVOKEVIRTUAL, LHStypesmall + "/add(Ljava/awt/Component;Ljava/lang/Object;)V");
+    }
 
 }
-void StatementGenerator::emitAdd(SymtabEntry *var)
+void StatementGenerator::emitAdd(SymtabEntry *var, GooeyParser::ExpressionContext *title)
 {
 	string LHSname = var->getName();
 	string LHStype = typeDescriptor(var);
+    int nestingLevel = var->getSymtab()->getNestingLevel();
+    int slot = var->getSlotNumber();
+
 
 	emitLine();
 	emit(GETSTATIC, programName + "/" + "_mainframe", "Ljavax/swing/JFrame;");
-	emit(GETSTATIC, programName + "/" + LHSname, LHStype);
-	emit(LDC, "\"Center\"");
+	if(nestingLevel == 1)
+		emit(GETSTATIC, programName + "/" + LHSname, LHStype);
+	else
+		emitLoadLocal(var->getType(),slot);
+	compiler->visit(title);
 	emit(INVOKEVIRTUAL, "javax/swing/JFrame/add(Ljava/awt/Component;Ljava/lang/Object;)V");
 
+}
+
+void StatementGenerator::emitSetText(GooeyParser::ExpressionContext *text, SymtabEntry *var)
+{
+	string varName = var->getName();
+	string varType = typeDescriptor(var);
+	string varTypeS = objectTypeName(var->getType());
+	emit(GETSTATIC, programName+ "/" + varName, varType);
+	compiler->visit(text);
+	emit(INVOKEVIRTUAL,varTypeS + "/setText(Ljava/lang/String;)V");
+
+}
+
+void StatementGenerator::emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var)
+{
+
+	string varName = var->getName();
+	string varType = typeDescriptor(var);
+	string varTypeS = objectTypeName(var->getType());
+	SymtabEntry *actionId = ctx->entry;
+	string actionName = actionId->getName();
+	emit(GETSTATIC, programName+ "/" + varName, varType);
+	emit(NEW, programName + "_" + actionName);
+	emit(DUP);
+	emit(INVOKESPECIAL, programName + "_" + actionName +"/<init>()V");
+	emit(INVOKEVIRTUAL, varTypeS + "/addActionListener(Ljava/awt/event/ActionListener;)V");
 }
 }} // namespace backend::compiler

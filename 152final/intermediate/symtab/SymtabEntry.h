@@ -37,7 +37,7 @@ enum class Kind
 {
     CONSTANT, ENUMERATION_CONSTANT, TYPE, VARIABLE, RECORD_FIELD,
     VALUE_PARAMETER, REFERENCE_PARAMETER, PROGRAM_PARAMETER,
-    PROGRAM, PROCEDURE, FUNCTION,
+    PROGRAM, PROCEDURE, FUNCTION, ACTION,
     UNDEFINED
 };
 
@@ -45,7 +45,7 @@ static const string KIND_STRINGS[] =
 {
 	    "constant", "enumeration constant", "type", "variable", "record field",
 	    "value parameter", "reference parameter", "program parameter",
-	    "PROGRAM", "PROCEDURE", "FUNCTION",
+	    "PROGRAM", "PROCEDURE", "FUNCTION", "ACTION",
 	    "undefined"
 };
 
@@ -60,6 +60,7 @@ constexpr Kind PROGRAM_PARAMETER    = Kind::PROGRAM_PARAMETER;
 constexpr Kind PROGRAM              = Kind::PROGRAM;
 constexpr Kind PROCEDURE            = Kind::PROCEDURE;
 constexpr Kind FUNCTION             = Kind::FUNCTION;
+constexpr Kind ACTION	            = Kind::ACTION;
 constexpr Kind UNDEFINED            = Kind::UNDEFINED;
 
 /**
@@ -69,7 +70,8 @@ enum class Routine
 {
     DECLARED, FORWARD,
     READ, READLN, WRITE, WRITELN,
-    ROUND,SUCC, TRUNC, CREATE, ADD, FINISH
+    ROUND,SUCC, TRUNC,
+	CREATE,ADD, FINISH, ADDACTION, SETTEXT
 };
 
 constexpr Routine DECLARED      = Routine::DECLARED;
@@ -84,6 +86,8 @@ constexpr Routine TRUNC         = Routine::TRUNC;
 constexpr Routine CREATE		= Routine::CREATE;
 constexpr Routine ADD			= Routine::ADD;
 constexpr Routine FINISH		= Routine::FINISH;
+constexpr Routine ADDACTION		= Routine::ADDACTION;
+constexpr Routine SETTEXT		= Routine::SETTEXT;
 
 class SymtabEntry
 {
@@ -107,6 +111,11 @@ private:
             vector<SymtabEntry *> *subroutines;  // symtab entries of subroutines
             Object *executable;                  // routine's executable code
         } routine;
+        struct
+        {
+        public:
+            Object *executable;                  // routine's executable code
+        } action;
     };
 
     string name;              // identifier name
@@ -135,7 +144,7 @@ public:
             case Kind::VALUE_PARAMETER:
                 info.data.value = nullptr;
                 break;
-
+            case Kind::ACTION:
             case Kind::PROGRAM:
             case Kind::PROCEDURE:
             case Kind::FUNCTION:
@@ -300,7 +309,7 @@ public:
      */
     void setExecutable(Object executable)
     {
-        info.routine.executable = new Object(executable);
+    	info.routine.executable = new Object(executable);
     }
 };
 
