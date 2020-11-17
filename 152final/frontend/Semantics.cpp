@@ -1,4 +1,3 @@
-#include <vector>
 #include <set>
 
 #include "antlr4-runtime.h"
@@ -65,30 +64,34 @@ Object Semantics::visitVariableDeclarations(GooeyParser::VariableDeclarationsCon
     for (GooeyParser::VariableIdentifierContext *idCtx :
                                                 listCtx->variableIdentifier())
     {
+    	bool arrayCheck = idCtx->arrayVardec() != nullptr;
         int lineNumber = idCtx->getStart()->getLine();
-        string variableName = toLowerCase(idCtx->IDENTIFIER()->getText());
+        string variableName = arrayCheck ? toLowerCase(idCtx->arrayVardec()->IDENTIFIER()->getText()) : toLowerCase(idCtx->IDENTIFIER()->getText());
         SymtabEntry *variableId = symtabStack->lookupLocal(variableName);
+
 
         if (variableId == nullptr)
         {
+        	Symtab *symtab;
         	variableId = symtabStack->enterLocal(variableName, VARIABLE);
-        	if(idCtx->modifierDeclare() == nullptr)
+        	if(arrayCheck)
         	{
-				variableId->setType(typeCtx->type);
+        		Typespec *type = typeCtx->type;
+        		Typespec *array;
+        		Typespec *baseArray;
+        		visit(idCtx->arrayVardec());
+	        	symtab = variableId->getSymtab();
+	        	array = idCtx->arrayVardec()->type;
+	        	baseArray = idCtx->arrayVardec()->baseType;
+	        	baseArray->setArrayElementType(type);
+	        	variableId->setType(array);
         	}
-//        	else
-//        	{
-//        		Typespec *arrayType = new Typespec(ARRAY);
-//        		visit(idCtx->modifier()->expression());
-//        		SymtabEntry *numEntry = idCtx->modifier()->expression()->entry;
-//        		arrayType->setArrayElementCount(numEntry->getValue().as<int>());
-//        		arrayType->setArrayElementType(typeCtx->type);
-//        		arrayType->setArrayIndexType(Predefined::integerType);
-//        		arrayType->setIdentifier(typeCtx->type->getIdentifier());
-//        		variableId->setType(arrayType);
-//        	}
-			// Assign slot numbers to local variables.
-			Symtab *symtab = variableId->getSymtab();
+        	else
+        	{
+	        	symtab = variableId->getSymtab();
+	        	variableId->setType(typeCtx->type);
+        	}
+
 			if (symtab->getNestingLevel() > 1)
 			{
 				variableId->setSlotNumber(symtab->nextSlotNumber());
@@ -108,6 +111,28 @@ Object Semantics::visitVariableDeclarations(GooeyParser::VariableDeclarationsCon
     return nullptr;
 }
 
+Object Semantics::visitArrayVardec(GooeyParser::ArrayVardecContext *ctx)
+{
+	Typespec *arrayType = new Typespec(ARRAY);
+	ctx->type = arrayType;
+	int modCount = ctx->modifierDeclare().size();
+	for(int i = 0; i < modCount; i++)
+	{
+		int arraySize = stoi(ctx->modifierDeclare(i)->INTEGER()->getText());
+		arrayType->setArrayElementCount(arraySize);
+		arrayType->setArrayIndexType(Predefined::integerType);
+		if(i < modCount-1)
+		{
+			Typespec *elmtType = new Typespec(ARRAY);
+			arrayType->setArrayElementType(elmtType);
+			arrayType = elmtType;
+		}
+	}
+	ctx->baseType = arrayType;
+
+	return nullptr;
+}
+
 Object Semantics::visitVariable(GooeyParser::VariableContext *ctx)
 {
 	int lineNumber = ctx->getStart()->getLine();
@@ -119,17 +144,11 @@ Object Semantics::visitVariable(GooeyParser::VariableContext *ctx)
 		ctx->entry = variableId;
 		if(ctx->type->getForm() == Form::ARRAY)
 		{
-			int count = ctx->type->getArrayElementCount();
-			int index = -1;
-			if(ctx->modifier()->expression()!= nullptr)
+			while(ctx->type->getForm() == Form::ARRAY) ctx->type = ctx->type->getArrayElementType();
+			for(GooeyParser::ModifierContext *modCtx : ctx->modifier())
 			{
+				visit(modCtx->expression());
 			}
-
-			bool inRange = count > index && index >=0;
-			if(inRange)
-				ctx->type = variableId->getType()->getArrayElementType();
-			else
-				error.flag(INVALID_FIELD, ctx);
 		}
 	}
 	else
@@ -209,7 +228,7 @@ Object Semantics::visitFuncDec(GooeyParser::FuncDecContext *ctx)
 		visit(retTypeCtx);
 		returnType = retTypeCtx->type;
 
-		if(returnType->getForm() != SCALAR)
+		if(returnType->getForm() != SCALAR && returnType->getForm() != ENUMERATION)
 		{
 			error.flag(INVALID_RETURN_TYPE, retTypeCtx);
 			returnType = Predefined::integerType;
@@ -799,7 +818,6 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	SymtabEntry *routineId = symtabStack->lookup(routineName);
 	int argSize = ctx->argumentList() != nullptr ? ctx->argumentList()->argument().size() : 0;
 	ctx->routine = routineId;
-
 	//check if fucntion and variables are defined
 	if(varId == nullptr)
 		error.flag(UNDECLARED_IDENTIFIER, ctx->variable());
@@ -813,7 +831,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	if(varId->getKind() != Kind::VARIABLE){ error.flag(INVALID_TYPE, ctx->variable()); return nullptr;}
 	//some predefined routins can only be used with certain types
 
-	if(varId->getType()->getForm() == Form::COMPONENT)
+	if(type->getForm() == Form::COMPONENT)
 	{
 		if(type->getIdentifier()->getName() == "label" || type->getIdentifier()->getName() == "button")
 		{
@@ -822,7 +840,10 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 		}
 	}
 	else
+	{
 		error.flag(INVALID_TYPE, ctx->variable());
+	}
+
 	//check arguments
 	if(routineName == "add")
 	{
@@ -834,7 +855,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 			GooeyParser::ArgumentContext *arg2Ctx = ctx->argumentList()->argument(1);
 			visit(arg1Ctx->expression());
 			visit(arg2Ctx->expression());
-			string argName = toLowerCase(arg1Ctx->getText());
+			string argName = toLowerCase(arg1Ctx->expression()->simpleExpression(0)->term(0)->factor(0)->children[0]->children[0]->getText());
 			SymtabEntry *argId = symtabStack->lookup(argName);
 			if(argId == nullptr) error.flag(UNDECLARED_IDENTIFIER, arg1Ctx);
 			else arg1Ctx->expression()->entry = argId;
@@ -850,6 +871,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	else if(routineName == "create")
 	{
 		string typeName = type->getIdentifier()->getName();
+		cout << typeName << endl;
 		if(typeName == "panel" || typeName == "text" )
 				{
 					if( argSize != 0 )
@@ -911,7 +933,7 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 
 	else if(routineName == "settext")
 	{
-		if(type->getIdentifier()->getName() != "label")
+		if(type->getIdentifier()->getName() != "label" && type->getIdentifier()->getName() != "button" )
 			error.flag(INVALID_FIELD, ctx);
 		else if( argSize != 1)
 		{

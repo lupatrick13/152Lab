@@ -52,7 +52,7 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
         {
             emitSimpleExpression(simpleCtx2);
 
-            if      (op == "=" ) emit(IF_ICMPEQ, trueLabel);
+            if      (op == "==" ) emit(IF_ICMPEQ, trueLabel);
             else if (op == "<>") emit(IF_ICMPNE, trueLabel);
             else if (op == "<" ) emit(IF_ICMPLT, trueLabel);
             else if (op == "<=") emit(IF_ICMPLE, trueLabel);
@@ -67,7 +67,7 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
 
             emit(FCMPG);
 
-            if      (op == "=" ) emit(IFEQ, trueLabel);
+            if      (op == "==" ) emit(IFEQ, trueLabel);
             else if (op == "<>") emit(IFNE, trueLabel);
             else if (op == "<" ) emit(IFLT, trueLabel);
             else if (op == "<=") emit(IFLE, trueLabel);
@@ -81,7 +81,7 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
                  "java/lang/String.compareTo(Ljava/lang/String;)I");
             localStack->decrease(1);
 
-            if      (op == "=" ) emit(IFEQ, trueLabel);
+            if      (op == "==" ) emit(IFEQ, trueLabel);
             else if (op == "<>") emit(IFNE, trueLabel);
             else if (op == "<" ) emit(IFLT, trueLabel);
             else if (op == "<=") emit(IFLE, trueLabel);
@@ -264,11 +264,23 @@ void ExpressionGenerator::emitLoadValue(GooeyParser::VariableContext *varCtx)
 {
     // Load the scalar value or structure address.
     Typespec *variableType = emitLoadVariable(varCtx);
-
-    // Load an array element's or record field's value.
-        if (varCtx->modifier() != nullptr)
+    SymtabEntry *entry = varCtx->entry;
+    vector<GooeyParser::ExpressionContext *> *indexs;
+     //Load an array element's or record field's value.
+        if (varCtx->modifier(0) != nullptr)
         {
-            emitLoadArrayElementValue(variableType);
+        	vector<GooeyParser::ExpressionContext *> *indexs = new vector<GooeyParser::ExpressionContext *>();
+        	for(GooeyParser::ModifierContext *modCtx : varCtx->modifier())
+        	{
+        		indexs->push_back(modCtx->expression());
+        		cout << modCtx->expression()->getText() << endl;
+        	}
+    		cout << entry->getName() + ": " << indexs->size()<< endl;
+        	for(GooeyParser::ExpressionContext *expCtx : *indexs)
+        	{
+        		compiler->visit(expCtx);
+        		emit(AALOAD);
+        	}
         }
 
 }
@@ -277,8 +289,11 @@ Typespec *ExpressionGenerator::emitLoadVariable(
                                         GooeyParser::VariableContext *varCtx)
 {
     SymtabEntry *variableId = varCtx->entry;
-    Typespec *variableType = variableId->getType();
-    bool modifierCount = varCtx->modifier() != nullptr;
+    Typespec *type = variableId->getType();
+    while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
+    Typespec *variableType = type;
+
+//    bool modifierCount = varCtx->modifier() != nullptr;
 
     // Scalar value or structure address.
     CodeGenerator::emitLoadValue(variableId);  // why need CodeGenerator::?

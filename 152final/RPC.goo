@@ -1,0 +1,169 @@
+GOOEY rps; // 1 = rock 2 = scissor 3 = paper
+
+var : int choice, compChoice, score, computerScore;
+		panel appPan, lpan, cpan, rpan, mpan, bpan, outPan;
+		label scoreL, compLab, win, compScoreL;
+		button rock, paper, scissor;
+		str choiceLab;
+func:
+		int checkWin(int choice1; int choice2)
+		{
+			if((choice1 == 1) and (choice2 == 2))
+			{ 
+				checkWin = 1
+			}
+			else if((choice1 == 2) and (choice2 == 3))
+			{
+				checkWin = 1
+			}
+			else if((choice1 == 3) and (choice2 == 1))
+			{
+				checkWin = 1
+			}
+			else
+			{
+				checkWin = 0
+			}
+		}
+act: rock1{
+		choice = 1;
+		compChoice = random(3) + 1;
+		if(checkWin(choice, compChoice))
+		{
+			score = score + 1;
+			win.setText("Win!");
+		}
+		else if(choice == compchoice)
+		{
+			win.setText("Tie!");
+		}
+		else 
+		{
+			win.setText("you lost!");
+			computerScore = computerscore +1;
+		};
+		
+
+		if(compChoice == 1)
+		{
+			choiceLab = "Rock";
+		}
+		else if(compChoice == 2)
+		{
+			choiceLab = "Scissors";
+		}
+		else
+			choiceLab = "Paper";
+		scoreL.setText("Your score is " + score);
+		compscorel.setText("My score is " + computerscore);
+		complab.setText("I chose " + choiceLab);
+	}
+	scissor1{
+		choice = 2;
+		compChoice = random(3)+ 1;
+		if(checkWin(choice, compChoice))
+		{
+			score = score + 1;
+			win.setText("Win!");
+		}
+		else if(choice == compchoice)
+		{
+			win.setText("Tie!");
+		}
+		else 
+		{
+			win.setText("you lost!");
+			computerScore = computerscore +1;
+		};
+		
+		if(compChoice == 1)
+		{
+			choiceLab = "Rock";
+		}
+		else if(compChoice == 2)
+		{
+			choiceLab = "Scissors";
+		}
+		else
+			choiceLab = "Paper";
+		scoreL.setText("Your score is " + score);
+		compscorel.setText("My score is " + computerscore);
+		complab.setText("I chose " + choiceLab);
+	}
+	
+	paper1{
+		choice = 3;
+		compChoice = random(3) +1;
+		if(checkWin(choice, compChoice))
+		{
+			score = score + 1; 
+			win.setText("Win!");
+		}
+		else if(choice == compchoice)
+		{
+			win.setText("Tie!");
+		}
+		else 
+		{
+			win.setText("you lost!");
+			computerScore = computerscore +1;
+		};
+		
+		if(compChoice == 1)
+		{
+			choiceLab = "Rock";
+		}
+		else if(compChoice == 2)
+		{
+			choiceLab = "Scissors";
+		}
+		else
+			choiceLab = "Paper";
+		
+		complab.setText("I chose " + choicelab);
+		compscorel.setText("My score is " + computerscore);
+		scoreL.setText("Your score is " + score);
+	}
+	
+main : 
+{
+	score = 0;
+	computerscore = 0;
+	compchoice = 1;
+	appPan.create();
+	lpan.create();
+	cpan.create();
+	rpan.create();
+	mpan.create();
+	bpan.create();
+	outpan.create();
+	
+	scoreL.create("Your score is 0");
+	compScoreL.create("My score is 0");
+	complab.create("Let's Play! First to 10");
+	win.create("");
+	
+	rock.create("Rock");
+	paper.create("Paper");
+	scissor.create("Scissor");
+	rock.addaction(rock1.);
+	paper.addaction(paper1.);
+	scissor.addaction(scissor1.);
+	
+	rock.settext("HELLO");
+	
+	appPan.add(scoreL, "West");
+	apppan.add(compScoreL, "East");
+	Lpan.add(rock, "South");
+	Cpan.add(paper, "Center");
+	Rpan.add(scissor, "South");
+	Cpan.add(complab, "North");
+	Bpan.add(win, "Center");
+	
+	outpan.add(apppan, "North");
+	outpan.add(Lpan, "West");
+	outpan.add(Cpan, "Center");
+	outpan.add(rpan, "East");
+	bpan.finish("South");
+	outpan.finish("North");
+}

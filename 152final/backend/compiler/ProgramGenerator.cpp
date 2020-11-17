@@ -101,6 +101,7 @@ void ProgramGenerator::emitProgramVariables()
 
     emitLine();
     emitDirective(FIELD_PRIVATE_STATIC, "_sysin", "Ljava/util/Scanner;");
+    emitDirective(FIELD_PROTECTED_STATIC, "_random", "Ljava/util/Random;");
 
     // Loop over all the program's identifiers and
     // emit a .field directive for each variable.
@@ -126,6 +127,11 @@ void ProgramGenerator::emitInputScanner()
     emit(GETSTATIC, "java/lang/System/in Ljava/io/InputStream;");
     emit(INVOKESPECIAL, "java/util/Scanner/<init>(Ljava/io/InputStream;)V");
     emit(PUTSTATIC, programName + "/_sysin Ljava/util/Scanner;");
+    //Initialize RNG
+    emit(NEW, "java/util/Random");
+    emit(DUP);
+    emit(INVOKESPECIAL, "java/util/Random/<init>()V");
+    emit(PUTSTATIC, programName+"/_random", "Ljava/util/Random;");
 
     //Initializing the frame
 	emitLine();
@@ -308,7 +314,7 @@ void ProgramGenerator::emitRoutineHeader(SymtabEntry *routineId)
     emitLine();
     emitComment("FUNCTION " + routineName);
 
-    emitDirective(METHOD_PRIVATE_STATIC, header);
+    emitDirective(METHOD_PROTECTED_STATIC, header);
 }
 
 void ProgramGenerator::emitRoutineLocals(SymtabEntry *routineId)

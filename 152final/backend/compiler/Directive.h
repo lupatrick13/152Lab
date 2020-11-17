@@ -30,6 +30,7 @@ enum class Directive
     METHOD_STATIC,
     METHOD_PUBLIC_STATIC,
     METHOD_PRIVATE_STATIC,
+	METHOD_PROTECTED_STATIC,
     END_METHOD,
     LIMIT_LOCALS,
     LIMIT_STACK,
@@ -52,6 +53,7 @@ static const string DIRECTIVE_STRINGS[] =
     ".method static",
     ".method public static",
     ".method private static",
+	".method protected static",
     ".end method",
     ".limit locals",
     ".limit stack",
@@ -72,6 +74,7 @@ constexpr Directive METHOD_PUBLIC         = Directive::METHOD_PUBLIC;
 constexpr Directive METHOD_STATIC         = Directive::METHOD_STATIC;
 constexpr Directive METHOD_PUBLIC_STATIC  = Directive::METHOD_PUBLIC_STATIC;
 constexpr Directive METHOD_PRIVATE_STATIC = Directive::METHOD_PRIVATE_STATIC;
+constexpr Directive METHOD_PROTECTED_STATIC = Directive::METHOD_PROTECTED_STATIC;
 constexpr Directive END_METHOD            = Directive::END_METHOD;
 constexpr Directive LIMIT_LOCALS          = Directive::LIMIT_LOCALS;
 constexpr Directive LIMIT_STACK           = Directive::LIMIT_STACK;

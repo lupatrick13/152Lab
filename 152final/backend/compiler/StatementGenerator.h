@@ -53,10 +53,12 @@ public:
     void emitFunctionCall(GooeyParser::FunctionCallContext *ctx);
     void emitProcedureCall(GooeyParser::ProcedureCallContext *ctx);
     void emitPredefined(GooeyParser::PredefinedRoutineCallContext *ctx);
-    void emitAdd(SymtabEntry *var1, GooeyParser::ExpressionContext *title);
-    void emitAdd(GooeyParser::ExpressionContext *title, SymtabEntry *var1, SymtabEntry *var2);
-    void emitSetText(GooeyParser::ExpressionContext *text, SymtabEntry *var);
+    void emitAdd(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var1,vector<GooeyParser::ExpressionContext*> *indexs, int check );
+    void emitAdd(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var1,
+			vector<GooeyParser::ExpressionContext*> *indexs);
+    void emitSetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var);
     void emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var);
+    void emitLoadArray(SymtabEntry *array, vector<GooeyParser::ExpressionContext *> *indexs);
 private:
 
 
@@ -76,7 +78,8 @@ private:
     void emitCall(SymtabEntry *routineId,
                   GooeyParser::ArgumentListContext *argListCtx);
 
-    void emitCreate(GooeyParser::ExpressionContext *title, SymtabEntry *entry);
+    void emitCreate(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *entry, vector<GooeyParser::ExpressionContext*> *indexs);
+
 
 
 

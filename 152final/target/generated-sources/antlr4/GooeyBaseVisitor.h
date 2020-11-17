@@ -98,6 +98,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitArrayVardec(GooeyParser::ArrayVardecContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitModifierDeclare(GooeyParser::ModifierDeclareContext *ctx) override {
     return visitChildren(ctx);
   }

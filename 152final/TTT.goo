@@ -1,0 +1,26 @@
+GOOEY ttt;
+var: button board[3][3];
+	 panel	upan[3];
+	 int i, j;
+	 str pos[3];
+	 
+main:
+{
+	pos[0] = "North";
+	pos[1] = "South";
+	pos[2] = "Center";
+	i = 3;
+	for(i = 0 to 3)
+	{
+		upan[i].create();
+		for(j = 0 to 3)
+		{
+			board[i][j].create("at: " + i + "+" + j);
+			upan[i].add(board[i][j], pos[j]); 
+		}
+	};
+	for(i = 0 to 3)
+	{
+		upan[i].finish(pos[i]);
+	}
+}

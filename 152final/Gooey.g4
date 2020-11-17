@@ -8,7 +8,7 @@ grammar Gooey;
     using namespace intermediate::type;
 }
 
-program           : programHeader block;
+program           : programHeader ('(' INTEGER ',' INTEGER ')')? block;
 programHeader     : GOOEY title ';' ; 
 
 title   locals [ SymtabEntry *entry = nullptr ]
@@ -23,7 +23,7 @@ variableDeclarationsList : variableDeclarations ( ';' variableDeclarations)* ';'
 variableDeclarations 	: types variableIdentifierList;
 variableIdentifierList	: variableIdentifier ( ',' variableIdentifier)*;
 variableIdentifier		locals [Typespec *type = nullptr, SymtabEntry *entry]
-						: IDENTIFIER modifierDeclare?;
+						: IDENTIFIER | arrayVardec;
 	
 types locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]  
 	: IDENTIFIER;	
@@ -43,8 +43,10 @@ returnType locals [ Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
 :	IDENTIFIER;
 
 variable locals [Typespec *type = nullptr, SymtabEntry *entry = nullptr ]
-	: IDENTIFIER modifier?;
+	: IDENTIFIER modifier*;
 	
+arrayVardec locals [Typespec *type = nullptr, Typespec *baseType = nullptr]
+	: IDENTIFIER modifierDeclare*;
 modifierDeclare : '[' INTEGER ']';
 modifier : '[' expression ']';
 
@@ -90,7 +92,7 @@ ifStatement    : IF '(' expression ')'  statement  ( ELSE  statement )? ;
 
 whileStatement  : WHILE '(' expression ')' statement ;
 
-forStatement : FOR '(' variable '=' expression TO expression')'  statement ;
+forStatement : FOR '(' variable '=' expression (DOWNTO|TO) expression')'  statement ;
 
 expression          locals [ Typespec *type = nullptr, SymtabEntry *entry ] 
     : simpleExpression (relOp simpleExpression)? ;
@@ -118,7 +120,7 @@ unsignedNumber  : REAL | INTEGER ;
 characterConstant : CHARACTER ;
 stringConstant    : STRING ;
        
-relOp : '=' | '!=' | '<' | '<=' | '>' | '>=' ;
+relOp : '==' | '!=' | '<' | '<=' | '>' | '>=' ;
 addOp : '+' | '-' | OR ;
 mulOp : '*' | '/' | AND ;
 
@@ -156,6 +158,7 @@ WHILE		: W H I L E;
 FOR			: F O R;
 IF			: I F ;
 ELSE		: E L S E;
+DOWNTO		: D O W N T O;
 TO			: T O;
 BY			: B Y;
 VAR			: V A R;

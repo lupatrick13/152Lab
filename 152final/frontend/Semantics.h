@@ -114,6 +114,7 @@ public:
     Object visitProgram(GooeyParser::ProgramContext *ctx) 							override;
     Object visitVariable(GooeyParser::VariableContext *ctx)							override;
     Object visitVariableDeclarations(GooeyParser::VariableDeclarationsContext *ctx) override;
+    Object visitArrayVardec(GooeyParser::ArrayVardecContext *ctx)					override;
     Object visitTypes(GooeyParser::TypesContext *ctx) 								override;
     Object visitProgramHeader(GooeyParser::ProgramHeaderContext *ctx)				override;
     Object visitFuncDec(GooeyParser::FuncDecContext *ctx) 							override;

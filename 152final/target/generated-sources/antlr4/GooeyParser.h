@@ -22,10 +22,10 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, GOOEY = 22, AND = 23, OR = 24, WHILE = 25, FOR = 26, IF = 27, 
-    ELSE = 28, TO = 29, BY = 30, VAR = 31, FUNC = 32, MAIN = 33, ACT = 34, 
-    IDENTIFIER = 35, INTEGER = 36, REAL = 37, NEWLINE = 38, WS = 39, QUOTE = 40, 
-    CHARACTER = 41, STRING = 42, COMMENT = 43
+    T__20 = 21, T__21 = 22, GOOEY = 23, AND = 24, OR = 25, WHILE = 26, FOR = 27, 
+    IF = 28, ELSE = 29, DOWNTO = 30, TO = 31, BY = 32, VAR = 33, FUNC = 34, 
+    MAIN = 35, ACT = 36, IDENTIFIER = 37, INTEGER = 38, REAL = 39, NEWLINE = 40, 
+    WS = 41, QUOTE = 42, CHARACTER = 43, STRING = 44, COMMENT = 45
   };
 
   enum {
@@ -34,16 +34,16 @@ public:
     RuleVariableIdentifierList = 7, RuleVariableIdentifier = 8, RuleTypes = 9, 
     RuleFunctiondef = 10, RuleFuncDec = 11, RuleParameter = 12, RuleParameterDecList = 13, 
     RuleParameterDec = 14, RuleParameterIdList = 15, RuleParameterId = 16, 
-    RuleReturnType = 17, RuleVariable = 18, RuleModifierDeclare = 19, RuleModifier = 20, 
-    RuleActionDef = 21, RuleActDec = 22, RuleActionName = 23, RuleSign = 24, 
-    RuleFunctionCall = 25, RuleProcedureCall = 26, RuleFunctionName = 27, 
-    RuleArgumentList = 28, RuleArgument = 29, RuleStatement = 30, RulePredefinedRoutineCall = 31, 
-    RulePredefinedRoutine = 32, RuleCompoundStatement = 33, RuleEmptyStatement = 34, 
-    RuleStatementList = 35, RuleAssignmentStatement = 36, RuleLhs = 37, 
-    RuleRhs = 38, RuleIfStatement = 39, RuleWhileStatement = 40, RuleForStatement = 41, 
-    RuleExpression = 42, RuleSimpleExpression = 43, RuleTerm = 44, RuleFactor = 45, 
-    RuleNumber = 46, RuleUnsignedNumber = 47, RuleCharacterConstant = 48, 
-    RuleStringConstant = 49, RuleRelOp = 50, RuleAddOp = 51, RuleMulOp = 52
+    RuleReturnType = 17, RuleVariable = 18, RuleArrayVardec = 19, RuleModifierDeclare = 20, 
+    RuleModifier = 21, RuleActionDef = 22, RuleActDec = 23, RuleActionName = 24, 
+    RuleSign = 25, RuleFunctionCall = 26, RuleProcedureCall = 27, RuleFunctionName = 28, 
+    RuleArgumentList = 29, RuleArgument = 30, RuleStatement = 31, RulePredefinedRoutineCall = 32, 
+    RulePredefinedRoutine = 33, RuleCompoundStatement = 34, RuleEmptyStatement = 35, 
+    RuleStatementList = 36, RuleAssignmentStatement = 37, RuleLhs = 38, 
+    RuleRhs = 39, RuleIfStatement = 40, RuleWhileStatement = 41, RuleForStatement = 42, 
+    RuleExpression = 43, RuleSimpleExpression = 44, RuleTerm = 45, RuleFactor = 46, 
+    RuleNumber = 47, RuleUnsignedNumber = 48, RuleCharacterConstant = 49, 
+    RuleStringConstant = 50, RuleRelOp = 51, RuleAddOp = 52, RuleMulOp = 53
   };
 
   GooeyParser(antlr4::TokenStream *input);
@@ -75,6 +75,7 @@ public:
   class ParameterIdContext;
   class ReturnTypeContext;
   class VariableContext;
+  class ArrayVardecContext;
   class ModifierDeclareContext;
   class ModifierContext;
   class ActionDefContext;
@@ -116,6 +117,8 @@ public:
     virtual size_t getRuleIndex() const override;
     ProgramHeaderContext *programHeader();
     BlockContext *block();
+    std::vector<antlr4::tree::TerminalNode *> INTEGER();
+    antlr4::tree::TerminalNode* INTEGER(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -233,7 +236,7 @@ public:
     VariableIdentifierContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *IDENTIFIER();
-    ModifierDeclareContext *modifierDeclare();
+    ArrayVardecContext *arrayVardec();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -383,7 +386,8 @@ public:
     VariableContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *IDENTIFIER();
-    ModifierContext *modifier();
+    std::vector<ModifierContext *> modifier();
+    ModifierContext* modifier(size_t i);
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
@@ -391,6 +395,23 @@ public:
   };
 
   VariableContext* variable();
+
+  class  ArrayVardecContext : public antlr4::ParserRuleContext {
+  public:
+    Typespec * type = nullptr;
+    Typespec * baseType = nullptr;
+    ArrayVardecContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *IDENTIFIER();
+    std::vector<ModifierDeclareContext *> modifierDeclare();
+    ModifierDeclareContext* modifierDeclare(size_t i);
+
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ArrayVardecContext* arrayVardec();
 
   class  ModifierDeclareContext : public antlr4::ParserRuleContext {
   public:
@@ -714,8 +735,9 @@ public:
     VariableContext *variable();
     std::vector<ExpressionContext *> expression();
     ExpressionContext* expression(size_t i);
-    antlr4::tree::TerminalNode *TO();
     StatementContext *statement();
+    antlr4::tree::TerminalNode *DOWNTO();
+    antlr4::tree::TerminalNode *TO();
 
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;

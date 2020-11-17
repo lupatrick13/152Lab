@@ -22,10 +22,10 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, T__9 = 10, T__10 = 11, T__11 = 12, T__12 = 13, T__13 = 14, 
     T__14 = 15, T__15 = 16, T__16 = 17, T__17 = 18, T__18 = 19, T__19 = 20, 
-    T__20 = 21, GOOEY = 22, AND = 23, OR = 24, WHILE = 25, FOR = 26, IF = 27, 
-    ELSE = 28, TO = 29, BY = 30, VAR = 31, FUNC = 32, MAIN = 33, ACT = 34, 
-    IDENTIFIER = 35, INTEGER = 36, REAL = 37, NEWLINE = 38, WS = 39, QUOTE = 40, 
-    CHARACTER = 41, STRING = 42, COMMENT = 43
+    T__20 = 21, T__21 = 22, GOOEY = 23, AND = 24, OR = 25, WHILE = 26, FOR = 27, 
+    IF = 28, ELSE = 29, DOWNTO = 30, TO = 31, BY = 32, VAR = 33, FUNC = 34, 
+    MAIN = 35, ACT = 36, IDENTIFIER = 37, INTEGER = 38, REAL = 39, NEWLINE = 40, 
+    WS = 41, QUOTE = 42, CHARACTER = 43, STRING = 44, COMMENT = 45
   };
 
   GooeyLexer(antlr4::CharStream *input);

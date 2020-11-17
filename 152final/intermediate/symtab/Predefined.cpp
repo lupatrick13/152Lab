@@ -57,6 +57,7 @@ SymtabEntry *Predefined::addId;
 SymtabEntry *Predefined::finishId;
 SymtabEntry *Predefined::addActionId;
 SymtabEntry *Predefined::setTextId;
+SymtabEntry *Predefined::randomId;
 
 void Predefined::initialize(SymtabStack *symtabStack)
 {
@@ -153,6 +154,17 @@ void Predefined::initializeStandardRoutines(SymtabStack *symtabStack)
     finishId = enterStandard(symtabStack, PROCEDURE,  "finish",  FINISH);
     addActionId = enterStandard(symtabStack, PROCEDURE,  "addaction",  ADDACTION);
     setTextId = enterStandard(symtabStack, PROCEDURE,  "settext",  SETTEXT);
+    randomId = enterStandard(symtabStack, FUNCTION,  "random",  RANDOM);
+
+
+    randomId->setType(Predefined::integerType);
+    Kind kind = VALUE_PARAMETER;
+    SymtabEntry *parmId = symtabStack->lookupLocal("__RNGRange");
+	parmId = symtabStack->enterLocal("__RNGRange", kind);
+	parmId->setType(Predefined::integerType);
+	vector<SymtabEntry *> *parameterList = new vector<SymtabEntry *>();
+	parameterList->push_back(parmId);
+	randomId->setRoutineParameters(parameterList);
 }
 
 SymtabEntry *Predefined::enterStandard(SymtabStack *symtabStack,

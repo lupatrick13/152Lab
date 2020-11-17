@@ -71,7 +71,7 @@ enum class Routine
     DECLARED, FORWARD,
     READ, READLN, WRITE, WRITELN,
     ROUND,SUCC, TRUNC,
-	CREATE,ADD, FINISH, ADDACTION, SETTEXT
+	CREATE,ADD, FINISH, ADDACTION, SETTEXT, RANDOM
 };
 
 constexpr Routine DECLARED      = Routine::DECLARED;
@@ -88,6 +88,7 @@ constexpr Routine ADD			= Routine::ADD;
 constexpr Routine FINISH		= Routine::FINISH;
 constexpr Routine ADDACTION		= Routine::ADDACTION;
 constexpr Routine SETTEXT		= Routine::SETTEXT;
+constexpr Routine RANDOM		= Routine::RANDOM;
 
 class SymtabEntry
 {

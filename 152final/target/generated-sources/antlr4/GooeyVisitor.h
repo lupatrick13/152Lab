@@ -64,6 +64,8 @@ public:
 
     virtual antlrcpp::Any visitVariable(GooeyParser::VariableContext *context) = 0;
 
+    virtual antlrcpp::Any visitArrayVardec(GooeyParser::ArrayVardecContext *context) = 0;
+
     virtual antlrcpp::Any visitModifierDeclare(GooeyParser::ModifierDeclareContext *context) = 0;
 
     virtual antlrcpp::Any visitModifier(GooeyParser::ModifierContext *context) = 0;

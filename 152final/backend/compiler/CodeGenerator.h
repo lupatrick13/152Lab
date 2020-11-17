@@ -96,6 +96,7 @@ public:
      */
     void close() { objectFile->close(); }
 
+
     /**
      * Emit a blank line.
      */
@@ -345,6 +346,7 @@ public:
      */
     string valueSignature(Typespec *type);
 
+
 private:
     /**
      * Emit code to store a value to an ummodified target variable,
@@ -366,6 +368,7 @@ private:
      * @param fieldId the symbol table entry of the field.
      */
     void emitStoreToRecordField(SymtabEntry *fieldId);
+
 };
 
 }} // namespace backend::compiler

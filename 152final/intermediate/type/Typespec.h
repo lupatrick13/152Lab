@@ -243,6 +243,26 @@ public:
         {
             info.record.typePath = new string(typePath);
         }
+
+        Typespec *getSubrangeBaseType()
+        {
+        	return info.subrange.baseType;
+        }
+        void setSubrangeBaseType(Typespec *baseType)
+        {
+        	info.subrange.baseType = baseType;
+        }
+        int getSubrangeMinValue() const {return info.subrange.minValue;}
+        void setSubrangeMinValue(const int min_value)
+        {
+        	info.subrange.minValue = min_value;
+        }
+        int getSubrangeMaxValue() const {return info.subrange.maxValue;}
+        void setSubrangeMaxValue(const int max_value)
+        {
+        	info.subrange.maxValue = max_value;
+        }
+
 };
 
 }}  // namespace intermediate::type
