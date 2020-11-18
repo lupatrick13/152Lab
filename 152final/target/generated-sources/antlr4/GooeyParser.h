@@ -750,6 +750,7 @@ public:
   public:
     Typespec * type = nullptr;
     SymtabEntry * entry;
+    bool array = false;
     ExpressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<SimpleExpressionContext *> simpleExpression();
@@ -766,6 +767,7 @@ public:
   class  SimpleExpressionContext : public antlr4::ParserRuleContext {
   public:
     Typespec * type = nullptr;
+    bool array = false;
     SimpleExpressionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<TermContext *> term();
@@ -784,6 +786,7 @@ public:
   class  TermContext : public antlr4::ParserRuleContext {
   public:
     Typespec * type = nullptr;
+    bool array = false;
     TermContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     std::vector<FactorContext *> factor();
@@ -801,6 +804,7 @@ public:
   class  FactorContext : public antlr4::ParserRuleContext {
   public:
     Typespec * type = nullptr;
+    bool array = false;
     FactorContext(antlr4::ParserRuleContext *parent, size_t invokingState);
    
     FactorContext() = default;

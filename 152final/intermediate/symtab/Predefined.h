@@ -58,6 +58,8 @@ public:
     static SymtabEntry *finishId;
     static SymtabEntry *addActionId;
     static SymtabEntry *setTextId;
+    static SymtabEntry *setSizeId;
+    static SymtabEntry *getTextId;
     static SymtabEntry *randomId;
 
 

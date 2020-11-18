@@ -99,6 +99,7 @@ public:
     Object visitNotFactor(GooeyParser::NotFactorContext *ctx) override;
     Object visitParenthesizedFactor(GooeyParser::ParenthesizedFactorContext *ctx) override;
     Object visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallContext *ctx) override;
+    Object visitArgument(GooeyParser::ArgumentContext *ctx) override;
 
 
 

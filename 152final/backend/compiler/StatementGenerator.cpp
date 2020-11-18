@@ -37,8 +37,19 @@ void StatementGenerator::emitAssignment(GooeyParser::AssignmentStatementContext 
     Typespec *exprType = exprCtx->type;
 
     // The last modifier, if any, is the variable's last subscript or field.
-    //bool modifiercheck = varCtx->modifier() != nullptr;
-
+    //bool modifiercheck = varCtx->modifier(0) != nullptr;
+    if(varId->getType()->getForm() == Form::ARRAY)
+     {
+    	int count = varCtx->modifier().size()-1;
+    	int index = 0;
+     	compiler->visit(varCtx);
+     	for(GooeyParser::ModifierContext *modCtx : varCtx->modifier())
+     	{
+     		compiler->visit(modCtx->expression());
+     		if(count != index)  emit(AALOAD);
+     		index++;
+     	}
+     }
 
     // Emit code to evaluate the expression.
     compiler->visit(exprCtx);
@@ -47,13 +58,12 @@ void StatementGenerator::emitAssignment(GooeyParser::AssignmentStatementContext 
     if (   (varType == Predefined::realType)
         && (exprType->baseType() == Predefined::integerType)) emit(I2F);
 
-    if(varId->getType()->getForm() == Form::ARRAY)
-    {
-    	compiler->visit(varCtx);
-    }
-    else
+    if(varId->getType()->getForm() != Form::ARRAY)
     	emitStoreValue(varId, varType);
-
+    else if (exprType->baseType() == Predefined::integerType)
+    	emit(IASTORE);
+    else
+    	emit(AASTORE);
 }
 
 void StatementGenerator::emitIf(GooeyParser::IfStatementContext *ctx)
@@ -243,12 +253,19 @@ void StatementGenerator::emitPredefined(GooeyParser::PredefinedRoutineCallContex
 	}
 	if(routineName == "settext")
 	{
-		emitSetText(argCtx, varId);
+		emitSetText(argCtx, varId, indexs);
 	}
 	if(routineName == "addaction")
 	{
-
-		emitAddAction(action, varId);
+		emitAddAction(action, varId, indexs);
+	}
+	if(routineName == "setsize")
+	{
+		emitSetSize(argCtx, varId, indexs);
+	}
+	if(routineName == "gettext")
+	{
+		emitGetText(argCtx,varId, indexs);
 	}
 }
 
@@ -266,6 +283,7 @@ void StatementGenerator::emitCreate(GooeyParser::ArgumentListContext *argCtx, Sy
     	while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
     	typeName = type->getIdentifier()->getName();
     	object = objectTypeName(type);
+		emitLoadArray(entry, indexs);
     }
 	emitLine();
 
@@ -273,7 +291,12 @@ void StatementGenerator::emitCreate(GooeyParser::ArgumentListContext *argCtx, Sy
 	emit(DUP);
 	if(argCtx != nullptr)
 	{
-		compiler->visit(argCtx);
+		//compiler->visit(argCtx);
+    	for(GooeyParser::ArgumentContext *args: argCtx->argument())
+    	{
+    		compiler->visit(args);
+    		if(args->expression()->array) emit(AALOAD);
+    	}
 		emit(INVOKESPECIAL, object + "/<init>(Ljava/lang/String;)V");
 	}
 	else if( typeName== "panel")
@@ -301,7 +324,6 @@ void StatementGenerator::emitCreate(GooeyParser::ArgumentListContext *argCtx, Sy
 			emit(PUTSTATIC, programName + "/" + varName, typeDescriptor(entry));
 		else
 		{
-			emitLoadArray(entry, indexs);
 			emit(AASTORE);
 		}
 	}
@@ -328,9 +350,19 @@ void StatementGenerator::emitAdd(GooeyParser::ArgumentListContext *argCtx, Symta
     		emit(GETSTATIC, programName + "/" + LHSname, LHStype);
     	else
     	{
+    		Typespec *type = var1->getType();
+    		while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
     		emitLoadArray(var1, indexs);
+    		emit(AALOAD);
+    		LHStypesmall = objectTypeName(type);
     	}
-    	compiler->visit(argCtx);
+
+    	//compiler->visit(argCtx);
+    	for(GooeyParser::ArgumentContext *args: argCtx->argument())
+    	{
+    		compiler->visit(args);
+    		if(args->expression()->array) emit(AALOAD);
+    	}
 		emit(INVOKEVIRTUAL, LHStypesmall + "/add(Ljava/awt/Component;Ljava/lang/Object;)V");
     }
     else
@@ -355,27 +387,64 @@ void StatementGenerator::emitAdd(GooeyParser::ArgumentListContext *argCtx,Symtab
 	{
 		if(arrc == 0)
 			emit(GETSTATIC, programName + "/" + LHSname, LHStype);
-		else emitLoadArray(var, indexs);
+		else {
+			emitLoadArray(var, indexs);
+			emit(AALOAD);
+		}
 	}
 	else
 		emitLoadLocal(var->getType(),slot);
-	compiler->visit(argCtx);
+	//compiler->visit(argCtx);
+	for(GooeyParser::ArgumentContext *args: argCtx->argument())
+	{
+		compiler->visit(args);
+		if(args->expression()->array){
+			emit(AALOAD);
+		}
+	}
 	emit(INVOKEVIRTUAL, "javax/swing/JFrame/add(Ljava/awt/Component;Ljava/lang/Object;)V");
 
 }
 
-void StatementGenerator::emitSetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var)
+void StatementGenerator::emitSetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs)
 {
 	string varName = var->getName();
 	string varType = typeDescriptor(var);
 	string varTypeS = objectTypeName(var->getType());
-	emit(GETSTATIC, programName+ "/" + varName, varType);
-	compiler->visit(argCtx);
+	int arrc = var->getType()->getArrayElementCount();
+	if(arrc == 0)
+	{
+		if(varName != "source")
+			emit(GETSTATIC, programName + "/" + varName, varType);
+		else
+		{
+			emit(ALOAD_1);
+			emit(INVOKEVIRTUAL, "java/awt/event/ActionEvent/getSource()Ljava/lang/Object;");
+			emit(CHECKCAST, varTypeS);
+		}
+
+	}
+	else {
+		Typespec *type = var->getType();
+		while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
+		varTypeS = objectTypeName(type);
+		emitLoadArray(var, indexs);
+		emit(AALOAD);
+	}
+	//compiler->visit(argCtx);
+	for(GooeyParser::ArgumentContext *args: argCtx->argument())
+	{
+		compiler->visit(args);
+		if(args->expression()->array && varName != "source"){
+			emit(AALOAD);
+			cout << "RIGHT HERE" << endl;
+		}
+	}
 	emit(INVOKEVIRTUAL,varTypeS + "/setText(Ljava/lang/String;)V");
 
 }
 
-void StatementGenerator::emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var)
+void StatementGenerator::emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs)
 {
 
 	string varName = var->getName();
@@ -383,21 +452,111 @@ void StatementGenerator::emitAddAction(GooeyParser::ActionNameContext *ctx, Symt
 	string varTypeS = objectTypeName(var->getType());
 	SymtabEntry *actionId = ctx->entry;
 	string actionName = actionId->getName();
-	emit(GETSTATIC, programName+ "/" + varName, varType);
+	int arrc = var->getType()->getArrayElementCount();
+	if(arrc == 0)
+		emit(GETSTATIC, programName+ "/" + varName, varType);
+	else
+	{
+		Typespec *type = var->getType();
+		while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
+		varTypeS = objectTypeName(type);
+		emitLoadArray(var, indexs);
+		emit(AALOAD);
+	}
 	emit(NEW, programName + "_" + actionName);
 	emit(DUP);
 	emit(INVOKESPECIAL, programName + "_" + actionName +"/<init>()V");
 	emit(INVOKEVIRTUAL, varTypeS + "/addActionListener(Ljava/awt/event/ActionListener;)V");
 }
 
+void StatementGenerator::emitSetSize(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs)
+{
+	string varName = var->getName();
+	string varType = typeDescriptor(var);
+	string varTypeS = objectTypeName(var->getType());
+	int arrc = var->getType()->getArrayElementCount();
+	if(arrc == 0)
+	{
+		if(varName != "source")
+			emit(GETSTATIC, programName + "/" + varName, varType);
+		else
+		{
+			emit(ALOAD_1);
+			emit(INVOKEVIRTUAL, "java/awt/event/ActionEvent/getSource()Ljava/lang/Object;");
+			emit(CHECKCAST, varTypeS);
+		}
 
+	}
+	else {
+		Typespec *type = var->getType();
+		while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
+		varTypeS = objectTypeName(type);
+		emitLoadArray(var, indexs);
+		emit(AALOAD);
+	}
+	emit(NEW, "java/awt/Dimension");
+	emit(DUP);
+	for(GooeyParser::ArgumentContext *args: argCtx->argument())
+	{
+		compiler->visit(args);
+		if(args->expression()->array && varName != "source") emit(AALOAD);
+	}
+	emit(INVOKESPECIAL, "java/awt/Dimension/<init>(II)V");
+	emit(INVOKEVIRTUAL,varTypeS + "/setPreferredSize(Ljava/awt/Dimension;)V");
+}
+
+void StatementGenerator::emitGetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs)
+{
+	string varName = var->getName();
+	string varType = typeDescriptor(var);
+	string varTypeS = objectTypeName(var->getType());
+	int arrc = var->getType()->getArrayElementCount();
+
+	if(arrc != 0)
+	{
+		Typespec *type = var->getType();
+		while(type->getForm() == Form::ARRAY) type = type->getArrayElementType();
+		varTypeS = objectTypeName(type);
+		emitLoadArray(var, indexs);
+	}
+
+	if(varName != "source"){
+		for(GooeyParser::ArgumentContext *args: argCtx->argument())
+		{
+			compiler->visit(args);
+			if(args->expression()->array && varName != "source") emit(AALOAD);
+		}
+	}
+	else
+	{
+		emit(ALOAD_1);
+		emit(INVOKEVIRTUAL, "java/awt/event/ActionEvent/getSource()Ljava/lang/Object;");
+		emit(CHECKCAST, varTypeS);
+	}
+
+	emit(INVOKEVIRTUAL, "javax/swing/JButton/getText()Ljava/lang/String;");
+
+
+	if(arrc == 0)
+	{
+		emit(PUTSTATIC, programName + "/" + varName, varType);
+	}
+	else {
+
+		emit(AASTORE);
+	}
+}
 void StatementGenerator::emitLoadArray(SymtabEntry *array, vector<GooeyParser::ExpressionContext *> *indexs)
 {
 	emitLoadValue(array);
+	int count = indexs->size() -1;
+	int index = 0;
 	for(GooeyParser::ExpressionContext *expCtx : *indexs)
 	{
 		compiler->visit(expCtx);
-		emit(AALOAD);
+		if(count != index) emit(AALOAD);
+		index++;
 	}
 }
+
 }} // namespace backend::compiler

@@ -57,6 +57,8 @@ SymtabEntry *Predefined::addId;
 SymtabEntry *Predefined::finishId;
 SymtabEntry *Predefined::addActionId;
 SymtabEntry *Predefined::setTextId;
+SymtabEntry *Predefined::setSizeId;
+SymtabEntry *Predefined::getTextId;
 SymtabEntry *Predefined::randomId;
 
 void Predefined::initialize(SymtabStack *symtabStack)
@@ -154,6 +156,8 @@ void Predefined::initializeStandardRoutines(SymtabStack *symtabStack)
     finishId = enterStandard(symtabStack, PROCEDURE,  "finish",  FINISH);
     addActionId = enterStandard(symtabStack, PROCEDURE,  "addaction",  ADDACTION);
     setTextId = enterStandard(symtabStack, PROCEDURE,  "settext",  SETTEXT);
+    setSizeId = enterStandard(symtabStack, PROCEDURE,  "setsize",  SETSIZE);
+    getTextId = enterStandard(symtabStack, PROCEDURE,  "gettext",  GETTEXT);
     randomId = enterStandard(symtabStack, FUNCTION,  "random",  RANDOM);
 
 

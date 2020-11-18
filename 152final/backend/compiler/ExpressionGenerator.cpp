@@ -50,10 +50,12 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
 
         if (integerMode || characterMode)
         {
+            if(simpleCtx1->array)
+            	emit(AALOAD);
             emitSimpleExpression(simpleCtx2);
 
             if      (op == "==" ) emit(IF_ICMPEQ, trueLabel);
-            else if (op == "<>") emit(IF_ICMPNE, trueLabel);
+            else if (op == "!=") emit(IF_ICMPNE, trueLabel);
             else if (op == "<" ) emit(IF_ICMPLT, trueLabel);
             else if (op == "<=") emit(IF_ICMPLE, trueLabel);
             else if (op == ">" ) emit(IF_ICMPGT, trueLabel);
@@ -61,6 +63,8 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
         }
         else if (realMode)
         {
+            if(simpleCtx1->array)
+            	emit(AALOAD);
             if (type1 == Predefined::integerType) emit(I2F);
             emitSimpleExpression(simpleCtx2);
             if (type2 == Predefined::integerType) emit(I2F);
@@ -68,7 +72,7 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
             emit(FCMPG);
 
             if      (op == "==" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
+            else if (op == "!=") emit(IFNE, trueLabel);
             else if (op == "<" ) emit(IFLT, trueLabel);
             else if (op == "<=") emit(IFLE, trueLabel);
             else if (op == ">" ) emit(IFGT, trueLabel);
@@ -76,13 +80,15 @@ void ExpressionGenerator::emitExpression(GooeyParser::ExpressionContext *ctx)
         }
         else  // stringMode
         {
+            if(simpleCtx1->array)
+            	emit(AALOAD);
             emitSimpleExpression(simpleCtx2);
             emit(INVOKEVIRTUAL,
                  "java/lang/String.compareTo(Ljava/lang/String;)I");
             localStack->decrease(1);
 
             if      (op == "==" ) emit(IFEQ, trueLabel);
-            else if (op == "<>") emit(IFNE, trueLabel);
+            else if (op == "!=") emit(IFNE, trueLabel);
             else if (op == "<" ) emit(IFLT, trueLabel);
             else if (op == "<=") emit(IFLE, trueLabel);
             else if (op == ">" ) emit(IFGT, trueLabel);
@@ -141,6 +147,8 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
 
         if (integerMode)
         {
+            if(termCtx1->array)
+            	emit(AALOAD);
             emitTerm(termCtx2);
 
             if (op == "+") emit(IADD);
@@ -149,6 +157,8 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
         }
         else if (realMode)
         {
+            if(termCtx1->array)
+            	emit(AALOAD);
             if (type1 == Predefined::integerType) emit(I2F);
             emitTerm(termCtx2);
             if (type2 == Predefined::integerType) emit(I2F);
@@ -158,6 +168,8 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
         }
         else if (booleanMode)
         {
+            if(termCtx1->array)
+            	emit(AALOAD);
             emitTerm(termCtx2);
             emit(IOR);
         }
@@ -229,6 +241,8 @@ void ExpressionGenerator::emitTerm(GooeyParser::TermContext *ctx)
 
         if (integerMode)
         {
+            if(factorCtx1->array)
+            	emit(AALOAD);
             compiler->visit(factorCtx2);
 
             if      (op == "*")   emit(IMUL);
@@ -238,6 +252,8 @@ void ExpressionGenerator::emitTerm(GooeyParser::TermContext *ctx)
         }
         else if (realMode)
         {
+            if(factorCtx1->array)
+            	emit(AALOAD);
             if (type1 == Predefined::integerType) emit(I2F);
             compiler->visit(factorCtx2);
             if (type2 == Predefined::integerType) emit(I2F);
@@ -247,6 +263,8 @@ void ExpressionGenerator::emitTerm(GooeyParser::TermContext *ctx)
         }
         else  // booleanMode
         {
+            if(factorCtx1->array)
+            	emit(AALOAD);
             compiler->visit(factorCtx2);
             emit(IAND);
         }
@@ -273,13 +291,14 @@ void ExpressionGenerator::emitLoadValue(GooeyParser::VariableContext *varCtx)
         	for(GooeyParser::ModifierContext *modCtx : varCtx->modifier())
         	{
         		indexs->push_back(modCtx->expression());
-        		cout << modCtx->expression()->getText() << endl;
         	}
-    		cout << entry->getName() + ": " << indexs->size()<< endl;
+        	int size = indexs->size()-1;
+        	int index = 0;
         	for(GooeyParser::ExpressionContext *expCtx : *indexs)
         	{
         		compiler->visit(expCtx);
-        		emit(AALOAD);
+        		if(index != size) emit(AALOAD);
+        		index++;
         	}
         }
 

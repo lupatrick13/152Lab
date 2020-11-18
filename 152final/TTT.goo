@@ -1,26 +1,156 @@
 GOOEY ttt;
-var: button board[3][3];
-	 panel	upan[3];
-	 int i, j;
-	 str pos[3];
+var: button board[3][3], reset;
+	 panel	upan[3], oupan,lpan, wpan;
+	 label winText, xscore, oscore;
+	 int i, j, player, scorex, scoreo,wincheck, tiecheck;
+	 str pos[2][3];
+	 str check[3], curr; 
 	 
+act : 	choose
+		{
+		if((wincheck == 0) and (tiecheck == 0))
+		{
+			check[0].getText(source);
+			if((player == 1) and (check[0] == ""))
+			{
+				curr = "X";
+				source.setText("X");
+				player = 2;
+			} 
+			else if((player == 2) and (check[0] == ""))
+			{
+				curr = "O";
+				source.setText("O");
+				player = 1;
+			};
+			
+			if(curr == "X")
+			{
+				winText.setText("Turn : O");
+			}
+			else
+				winText.setText("Turn : X");
+				
+			//check if board is win
+			for(i = 0 to 2)
+			{
+				for(j = 0 to 2)
+				{
+					check[j].getText(board[i][j]);
+				};
+				if((check[0] == curr) and (check[1] == curr) and (check[2] == curr))
+					winCheck = 1;
+			};
+
+			for(i = 0 to 2)
+			{
+				for(j = 0 to 2)
+				{
+					check[j].getText(board[j][i]);
+				};
+				if((check[0] == curr) and (check[1] == curr) and (check[2] == curr))
+					winCheck = 1;
+			};
+			for(i = 0 to 2)
+			{
+				check[i].getText(board[i][i]);
+			};
+			if((check[0] == curr) and (check[1] == curr) and (check[2] == curr))
+					winCheck = 1;
+			for(i = 0 to 2)
+			{
+				check[i].getText(board[i][2-i]);
+			};
+			if((check[0] == curr) and (check[1] == curr) and (check[2] == curr))
+				winCheck = 1;
+				//done check
+			if(winCheck)
+			{
+				winText.setText(curr + " is the winner!");
+				if(curr == "X")
+				{
+				 	scorex = scorex + 1;
+				 	xscore.setText("X score: " + scorex);
+				}
+				else if(curr == "O")
+				{
+				 	scoreo = scoreo + 1;
+				 	oscore.setText("O score: " + scoreo);
+				};
+			}
+			else
+			{
+				tiecheck = 1;
+				for(i = 0 to 2)
+				{
+					for(j = 0 to 2)
+					{
+						check[j].getText(board[i][j]);
+						if(check[j] == "")
+							tiecheck = 0;
+					}
+				};
+				if(tiecheck)
+					winText.setText("It's a tie!");
+			};
+
+		}
+		}
+	 
+	 reset1 {
+		for(i = 0 to 2)
+		{
+			for(j = 0 to 2)
+			{
+				board[i][j].setText("");
+			}
+		};
+		player = 1;
+		wincheck = 0;
+		tiecheck = 0;
+		winText.setText("Turn : X");
+	 }
 main:
 {
-	pos[0] = "North";
-	pos[1] = "South";
-	pos[2] = "Center";
+	wincheck = 0;
+	scorex = 0;
+	scoreo = 0;
+	pos[0][0] = "West";
+	pos[0][1] = "Center";
+	pos[0][2] = "East";
+	pos[1][0] = "North";
+	pos[1][1] = "Center";
+	pos[1][2] = "South";
+	player = 1;
 	i = 3;
-	for(i = 0 to 3)
+	lpan.create();
+	wpan.create();
+	reset.create("Reset");
+	reset.addAction(reset1.);
+	oscore.create("O score : 0");
+	xscore.create("X score : 0");
+	wpan.add(oscore, "East");
+	wpan.add(xscore, "West");
+	for(i = 0 to 2)
 	{
 		upan[i].create();
-		for(j = 0 to 3)
+		for(j = 0 to 2)
 		{
-			board[i][j].create("at: " + i + "+" + j);
-			upan[i].add(board[i][j], pos[j]); 
+			board[i][j].create("");
+			board[i][j].setSize(70,70);
+			upan[i].add(board[i][j], pos[0][j]); 
+			board[i][j].addAction(choose.);
 		}
 	};
-	for(i = 0 to 3)
+	oupan.create();
+	winText.create("Lets play tic tac toe!");
+	for(i = 0 to 2)
 	{
-		upan[i].finish(pos[i]);
-	}
+		oupan.add(upan[i], pos[1][i]);
+	};
+	oupan.finish("Center");
+	lpan.add(winText, "Center");
+	lpan.add(reset, "East");
+	lpan.finish("South");
+	wpan.finish("North");
 }

@@ -263,9 +263,17 @@ void CodeGenerator::emitLoadValue(SymtabEntry *variableId)
     Typespec *type = variableId->getType()->baseType();
     Kind kind = variableId->getKind();
     int nestingLevel = variableId->getSymtab()->getNestingLevel();
+    string Name = variableId->getName();
+    string varTypeS = objectTypeName(variableId->getType());
 
+    if(Name == "source")
+    {
+		emit(ALOAD_1);
+		emit(INVOKEVIRTUAL, "java/awt/event/ActionEvent/getSource()Ljava/lang/Object;");
+		emit(CHECKCAST, varTypeS);
+    }
     // Constant
-    if (kind == CONSTANT)
+    else if (kind == CONSTANT)
     {
         Object value = variableId->getValue();
 

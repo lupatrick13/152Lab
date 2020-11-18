@@ -56,8 +56,10 @@ public:
     void emitAdd(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var1,vector<GooeyParser::ExpressionContext*> *indexs, int check );
     void emitAdd(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var1,
 			vector<GooeyParser::ExpressionContext*> *indexs);
-    void emitSetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var);
-    void emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var);
+    void emitSetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs);
+    void emitAddAction(GooeyParser::ActionNameContext *ctx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs);
+    void emitSetSize(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs);
+    void emitGetText(GooeyParser::ArgumentListContext *argCtx, SymtabEntry *var, vector<GooeyParser::ExpressionContext*> *indexs);
     void emitLoadArray(SymtabEntry *array, vector<GooeyParser::ExpressionContext *> *indexs);
 private:
 

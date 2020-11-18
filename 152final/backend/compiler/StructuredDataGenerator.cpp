@@ -86,7 +86,8 @@ void StructuredDataGenerator::emitAllocateArray(SymtabEntry *targetId,
             emit(ANEWARRAY, elmtType->getRecordTypePath());
             emit(DUP);
         }
-        else if (elmtType == Predefined::stringType)
+        else if (elmtType == Predefined::stringType ||elmtType == Predefined::buttonType||elmtType == Predefined::panelType
+        		||elmtType == Predefined::labelType)
         {
             emit(ANEWARRAY, typeName);
         }

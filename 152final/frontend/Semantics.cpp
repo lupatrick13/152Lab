@@ -30,7 +30,10 @@ Object Semantics::visitProgram(GooeyParser::ProgramContext *ctx)
 	if(ctx->block()->functiondef() != nullptr)
 		visit(ctx->block()->functiondef());
 	if(ctx->block()->actionDef() != nullptr)
+	{
 		visit(ctx->block()->actionDef());
+	}
+
 	visit(ctx->block()->compoundStatement());
 
 	CrossReferencer crossReferencer;
@@ -59,7 +62,8 @@ Object Semantics::visitVariableDeclarations(GooeyParser::VariableDeclarationsCon
 
     GooeyParser::VariableIdentifierListContext *listCtx =
                                                 ctx->variableIdentifierList();
-
+	SymtabEntry *sourceId = symtabStack->enterLocal("source", VARIABLE);
+	sourceId->setType(Predefined::buttonType);
     // Loop over the variables being declared.
     for (GooeyParser::VariableIdentifierContext *idCtx :
                                                 listCtx->variableIdentifier())
@@ -471,7 +475,7 @@ Object Semantics::visitExpression(GooeyParser::ExpressionContext *ctx)
 
 	Typespec *simpleType1 = simpleCtx1->type;
 	ctx->type = simpleType1;
-
+	ctx->array = simpleCtx1->array;
 	GooeyParser::RelOpContext *relOpCtx = ctx->relOp();
 
 	//Second Simple expression if there is relop
@@ -497,7 +501,6 @@ Object Semantics::visitSimpleExpression(GooeyParser::SimpleExpressionContext *ct
 	GooeyParser::SignContext *signCtx = ctx->sign();
 	bool hasSign = signCtx != nullptr;
 	GooeyParser::TermContext *termCtx1 = ctx->term(0);
-
 	if(hasSign)
 	{
 		string sign = signCtx->getText();
@@ -509,7 +512,7 @@ Object Semantics::visitSimpleExpression(GooeyParser::SimpleExpressionContext *ct
 
 	visit(termCtx1);
 	Typespec *termType1 = termCtx1->type;
-
+	ctx->array = termCtx1->array;
 	for(int i = 1; i<count; i++)
 	{
 		string op = toLowerCase(ctx->addOp(i-1)->getText());
@@ -586,7 +589,7 @@ Object Semantics::visitTerm(GooeyParser::TermContext *ctx)
     // First factor.
     visit(factorCtx1);
     Typespec *factorType1 = factorCtx1->type;
-
+    ctx->array = factorCtx1->array;
     // Loop over any subsequent factors.
     for (int i = 1; i < count; i++)
     {
@@ -678,6 +681,10 @@ Object Semantics::visitVariableFactor(GooeyParser::VariableFactorContext *ctx)
     visit(varCtx);
     ctx->type = varCtx->type;
 
+    if(ctx->variable()->modifier(0) != nullptr){
+    	ctx->array = true;
+    }
+    else ctx->array = false;
     return nullptr;
 }
 
@@ -839,10 +846,6 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 				error.flag(INVALID_TYPE, ctx->variable());
 		}
 	}
-	else
-	{
-		error.flag(INVALID_TYPE, ctx->variable());
-	}
 
 	//check arguments
 	if(routineName == "add")
@@ -871,7 +874,6 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 	else if(routineName == "create")
 	{
 		string typeName = type->getIdentifier()->getName();
-		cout << typeName << endl;
 		if(typeName == "panel" || typeName == "text" )
 				{
 					if( argSize != 0 )
@@ -940,6 +942,35 @@ Object Semantics::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallC
 			error.flag(INVALID_FIELD, ctx);
 		}
 		else if(argSize == 1)
+		{
+			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
+			visit(arg1Ctx);
+		}
+	}
+	else if(routineName == "setsize")
+	{
+		if(type->getIdentifier()->getName() != "button" && type->getIdentifier()->getName() != "panel")
+			error.flag(INVALID_FIELD, ctx);
+		else if(argSize != 2)
+		{
+			error.flag(INVALID_FIELD, ctx);
+		}
+		else
+		{
+			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
+			visit(arg1Ctx);
+		}
+	}
+
+	else if(routineName == "gettext")
+	{
+		if(type->getIdentifier()->getName() != "str" )
+			error.flag(INVALID_FIELD, ctx);
+		else if(argSize != 1)
+		{
+			error.flag(INVALID_FIELD, ctx);
+		}
+		else
 		{
 			GooeyParser::ExpressionContext *arg1Ctx = ctx->argumentList()->argument(0)->expression();
 			visit(arg1Ctx);

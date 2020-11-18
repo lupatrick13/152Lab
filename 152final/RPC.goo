@@ -140,7 +140,7 @@ main :
 	
 	scoreL.create("Your score is 0");
 	compScoreL.create("My score is 0");
-	complab.create("Let's Play! First to 10");
+	complab.create("        Let's Play!        ");
 	win.create("");
 	
 	rock.create("Rock");
@@ -150,7 +150,6 @@ main :
 	paper.addaction(paper1.);
 	scissor.addaction(scissor1.);
 	
-	rock.settext("HELLO");
 	
 	appPan.add(scoreL, "West");
 	apppan.add(compScoreL, "East");

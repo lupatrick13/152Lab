@@ -8,8 +8,8 @@ grammar Gooey;
     using namespace intermediate::type;
 }
 
-program           : programHeader ('(' INTEGER ',' INTEGER ')')? block;
-programHeader     : GOOEY title ';' ; 
+program           : programHeader ('(' INTEGER ',' INTEGER ')')? ';' block;
+programHeader     : GOOEY title; 
 
 title   locals [ SymtabEntry *entry = nullptr ]
     : IDENTIFIER ;
@@ -76,7 +76,7 @@ statement : compoundStatement
           ;
 
 predefinedRoutineCall locals [SymtabEntry *routine = nullptr]
-					:	variable '.' predefinedRoutine '(' argumentList? ')';
+					: variable '.' predefinedRoutine '(' argumentList? ')';
 predefinedRoutine	: IDENTIFIER;
 compoundStatement : '{' statementList '}';
 emptyStatement : ;
@@ -94,16 +94,16 @@ whileStatement  : WHILE '(' expression ')' statement ;
 
 forStatement : FOR '(' variable '=' expression (DOWNTO|TO) expression')'  statement ;
 
-expression          locals [ Typespec *type = nullptr, SymtabEntry *entry ] 
+expression          locals [ Typespec *type = nullptr, SymtabEntry *entry,bool array = false ] 
     : simpleExpression (relOp simpleExpression)? ;
     
-simpleExpression    locals [ Typespec *type = nullptr ] 
+simpleExpression    locals [ Typespec *type = nullptr , bool array = false] 
     : sign? term (addOp term)* ;
     
-term                locals [ Typespec *type = nullptr ]
+term                locals [ Typespec *type = nullptr, bool array = false ]
     : factor (mulOp factor)* ;
 
-factor              locals [ Typespec *type = nullptr ] 
+factor              locals [ Typespec *type = nullptr, bool array = false ] 
     : variable             # variableFactor
     | number               # numberFactor
     | characterConstant    # characterFactor
@@ -175,7 +175,7 @@ NEWLINE : '\r'? '\n' -> skip  ;
 WS      : [ \t]+ -> skip ; 
 
 QUOTE     : '"' ;
-CHARACTER : QUOTE CHARACTER_CHAR QUOTE ;
+CHARACTER : '\'' CHARACTER_CHAR '\'';
 STRING    : QUOTE STRING_CHAR* QUOTE ;
 
 fragment CHARACTER_CHAR : ~('\'')   // any non-quote character

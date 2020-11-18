@@ -56,7 +56,7 @@ private:
     /*
      * Emit code for the runtime input scanner.
      */
-    void emitInputScanner();
+    void emitInputScanner(GooeyParser::ProgramContext *ctx);
 
     /*
      * Emit code for the main program constructor.

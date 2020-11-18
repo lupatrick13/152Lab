@@ -143,6 +143,10 @@ Object Compiler::visitPredefinedRoutineCall(GooeyParser::PredefinedRoutineCallCo
 	return nullptr;
 }
 
-
+Object Compiler::visitArgument(GooeyParser::ArgumentContext *ctx)
+{
+	visit(ctx->expression());
+	return nullptr;
+}
 
 }}  // namespace backend::compiler

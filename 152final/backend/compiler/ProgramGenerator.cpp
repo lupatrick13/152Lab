@@ -31,7 +31,7 @@ void ProgramGenerator::emitProgram(GooeyParser::ProgramContext *ctx)
 
     emitDirective(FIELD_PRIVATE_STATIC, "_mainframe", "Ljavax/swing/JFrame;"); //initializes the frame that holds everything
     emitProgramVariables();
-    emitInputScanner();
+    emitInputScanner(ctx);
     emitConstructor();
     if(ctx->block()->functiondef()!= nullptr)
     	emitSubroutines(ctx->block()->functiondef());
@@ -115,7 +115,7 @@ void ProgramGenerator::emitProgramVariables()
     }
 }
 
-void ProgramGenerator::emitInputScanner()
+void ProgramGenerator::emitInputScanner(GooeyParser::ProgramContext *ctx)
 {
     emitLine();
     emitComment("Runtime input scanner");
@@ -141,14 +141,29 @@ void ProgramGenerator::emitInputScanner()
 	emit(INVOKESPECIAL, "javax/swing/JFrame/<init>(Ljava/lang/String;)V");
 	emit(DUP);
 	emit(PUTSTATIC, programName + "/_mainframe", "Ljavax/swing/JFrame;");
+
+	if(ctx->INTEGER(0) != nullptr)
+	{
+		int sizew = stoi(ctx->INTEGER(0)->getText());
+		int sizeh = stoi(ctx->INTEGER(1)->getText());
+		emit(DUP);
+		emit(NEW, "java/awt/Dimension");
+		emit(DUP);
+		emit(LDC, sizew);
+		emit(LDC, sizeh);
+		emit(INVOKESPECIAL, "java/awt/Dimension/<init>(II)V");
+		emit(INVOKEVIRTUAL,"javax/swing/JFrame/setMinimumSize(Ljava/awt/Dimension;)V"); //sets the minimum size
+	}
 	emit(GETSTATIC, "javax/swing/JFrame/EXIT_ON_CLOSE", "I");
 	emit(INVOKEVIRTUAL, "javax/swing/JFrame/setDefaultCloseOperation(I)V");
+
+
 
     emit(RETURN);
 
     emitLine();
     emitDirective(LIMIT_LOCALS, 0);
-    emitDirective(LIMIT_STACK,  3);
+    emitDirective(LIMIT_STACK,  6);
     emitDirective(END_METHOD);
 
     localStack->reset();
