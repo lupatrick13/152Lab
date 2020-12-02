@@ -147,7 +147,6 @@ void Predefined::initializeConstants(SymtabStack *symtabStack)
 
 void Predefined::initializeStandardRoutines(SymtabStack *symtabStack)
 {
-;
     roundId  = enterStandard(symtabStack, FUNCTION,  "round",   ROUND);
     succId   = enterStandard(symtabStack, FUNCTION,  "succ",    SUCC);
     truncId  = enterStandard(symtabStack, FUNCTION,  "trunc",   TRUNC);

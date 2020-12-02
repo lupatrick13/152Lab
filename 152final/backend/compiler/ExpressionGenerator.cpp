@@ -128,8 +128,14 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
         bool integerMode = false;
         bool realMode    = false;
         bool booleanMode = false;
+        bool stringMode  = false;
 
-        if (   (type1 == Predefined::integerType)
+        if((type1 == Predefined::stringType)
+                 || (type2 == Predefined::stringType))
+        {
+        	stringMode = true;
+        }
+        else if (   (type1 == Predefined::integerType)
             && (type2 == Predefined::integerType))
         {
             integerMode = true;
@@ -173,15 +179,17 @@ void ExpressionGenerator::emitSimpleExpression(GooeyParser::SimpleExpressionCont
             emitTerm(termCtx2);
             emit(IOR);
         }
-        else  // stringMode
+        else if(stringMode) // stringMode
         {
         	string type;
         	if(type1 != Predefined::stringType)
         	{
+        		if(type1->getForm() == Form::ARRAY) type1 = type1->getArrayElementType();
         		type = typeDescriptor(type1);
         	}
         	else if(type2 != Predefined::stringType)
         	{
+        		if(type1->getForm() == Form::ARRAY) type2 = type2->getArrayElementType();
         		type = typeDescriptor(type2);
         	}
         	else type = "Ljava/lang/String;";

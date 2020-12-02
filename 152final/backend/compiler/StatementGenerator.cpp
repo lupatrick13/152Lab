@@ -437,7 +437,6 @@ void StatementGenerator::emitSetText(GooeyParser::ArgumentListContext *argCtx, S
 		compiler->visit(args);
 		if(args->expression()->array && varName != "source"){
 			emit(AALOAD);
-			cout << "RIGHT HERE" << endl;
 		}
 	}
 	emit(INVOKEVIRTUAL,varTypeS + "/setText(Ljava/lang/String;)V");

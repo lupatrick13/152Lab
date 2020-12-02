@@ -1,0 +1,100 @@
+GOOEY eq;
+
+var: 
+	real output;
+	int temp1 ,temp0;
+	label outlabel;
+	panel top, mid, bot, botl, botr;
+	button addi, sub, mult, div, crazy;
+func:
+	real Add1(real input; int var1)
+	{
+		Add1 = input + var1;
+	}
+	
+	real Sub1(real input; int var1)
+	{
+		sub1 = input - var1;
+	}	
+	
+	real Mult2(real input; int var1)
+	{
+		Mult2 = input * var1;
+	}	
+	
+	real Div2(real input; int var1)
+	{
+		Div2 = input / var1;
+	}	
+	
+	real Craze(real input; int var1; int var2)
+	{
+		Craze = ((var1 * input) + (input / 3)) / var2;
+	}
+act:
+	adding{
+		temp0 = random(5);
+		source.setText("x = x + " +temp0);
+		output = add1(output, temp0);
+		outlabel.setText("x = " + output);
+	}
+	subbing{
+		temp0 = random(5);
+		source.setText("x = x - " +temp0);
+		output = sub1(output, temp0);
+		outlabel.setText("x = " + output);
+	}
+	multing{
+		temp0 = random(5) + 1;
+		source.setText("x = x * " +temp0);
+		output = mult2(output, temp0);
+		outlabel.setText("x = " + output);
+	}
+	diving{
+		temp0 = random(4) + 1;
+		source.setText("x = x / " +temp0);
+		output = div2(output, temp0);
+		outlabel.setText("x = " + output);
+	}
+	crazing{
+		temp0 = random(3) + 1;
+		temp1 = random(8) + 1;
+		source.setText("x = ((x * " + temp0 + ") + (x / 3)) / " + temp1 );
+		output = craze(output, temp0, temp1);
+		outlabel.setText("x = " + output);
+	}
+main:
+{
+	output = 0;
+	outLabel.create("Answer: 0");
+	top.create();
+	mid.create();
+	bot.create();
+	botl.create();
+	botr.create();
+	
+	addi.create("x = x + ?");
+	sub.create("x = x - ?");
+	mult.create("x = x * ?");
+	div.create("x = x / ?");
+	crazy.create("x = ((x * ?) + (x / 3)) / ?");
+	addi.addaction(adding.);
+	sub.addaction(subbing.);
+	mult.addaction(multing.);
+	div.addaction(diving.);
+	crazy.addaction(crazing.);
+	
+	botl.add(addi, "West");
+	botl.add(sub, "Center");
+	botl.add(mult, "East");
+	botr.add(div, "West");
+	botr.add(crazy, "Center");
+	bot.add(botl, "West");
+	bot.add(botr, "East");
+	top.add(outlabel, "Center");
+	top.finish("North");
+	bot.finish("South");
+
+
+
+}	
